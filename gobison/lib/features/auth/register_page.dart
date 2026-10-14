@@ -313,9 +313,12 @@ class _RegisterPageState extends State<RegisterPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text(
-                          'Already have an account? ',
-                          style: TextStyle(color: Colors.black54, fontSize: 14),
+                        const Flexible(
+                          child: Text(
+                            'Already have an account?',
+                            textAlign: TextAlign.end,
+                            style: TextStyle(color: Colors.black, fontSize: 14),
+                          ),
                         ),
                         TextButton(
                           onPressed: () {
@@ -328,7 +331,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
                           child: const Text(
-                            'Sign in',
+                            ' Sign in',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,

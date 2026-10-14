@@ -107,12 +107,22 @@ void main() {
 
       expect(tester.widget<EditableText>(passwordField).obscureText, isTrue);
 
-      await tester.tap(find.byTooltip('Show password'));
+      final showPasswordButton = find.byTooltip('Show password');
+
+      await tester.ensureVisible(showPasswordButton);
+      await tester.pumpAndSettle();
+
+      await tester.tap(showPasswordButton);
       await tester.pumpAndSettle();
 
       expect(tester.widget<EditableText>(passwordField).obscureText, isFalse);
 
-      await tester.tap(find.byTooltip('Hide password'));
+      final hidePasswordButton = find.byTooltip('Hide password');
+
+      await tester.ensureVisible(hidePasswordButton);
+      await tester.pumpAndSettle();
+
+      await tester.tap(hidePasswordButton);
       await tester.pumpAndSettle();
 
       expect(tester.widget<EditableText>(passwordField).obscureText, isTrue);
