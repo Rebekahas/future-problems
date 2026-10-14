@@ -37,3 +37,6 @@ These are our initial choices. We may update them as we learn more about the pro
 
 ### Architecture
 ![Architecture diagram](https://github.com/popcorn9499/future-problems/blob/master/docs/process-docs/architecture_sprint0.png)
+
+### Presentation
+[Presentation](https://canva.link/d1k25x9tslqee8g)
