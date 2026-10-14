@@ -19,7 +19,7 @@ void main() {
       expect(find.text('University of Manitoba Email'), findsOneWidget);
       expect(find.text('Password'), findsOneWidget);
       expect(find.text('Create Account'), findsOneWidget);
-      expect(find.text('Sign in'), findsOneWidget);
+      expect(find.text(' Sign in'), findsOneWidget);
     });
 
     testWidgets('shows validation errors when fields are empty', (
