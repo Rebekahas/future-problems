@@ -1,4 +1,4 @@
-package main.java.com.gobison.backend.features.user.domain.model;
+package com.gobison.backend.features.user.domain.model;
 
 public class User {
 
@@ -6,10 +6,12 @@ public class User {
     private String firstName;
     private String lastName;
     private boolean verified;
+    private String password;
 
-    public User(String umNetId, String firstName,
+    public User(String umNetId, String password, String firstName,
                 String lastName, boolean verified) {
         this.umNetId = umNetId;
+        this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
         this.verified = verified;
@@ -17,6 +19,10 @@ public class User {
 
     public String getUmNetId() {
         return umNetId;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     public String getFirstName() {
