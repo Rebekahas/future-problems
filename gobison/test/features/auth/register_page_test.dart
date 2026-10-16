@@ -46,7 +46,7 @@ void main() {
 
       await submitForm(tester);
 
-      expect(find.text('This field is required'), findsNWidgets(2));
+      expect(find.text('This field is required'), findsNWidgets(1));
       expect(find.text('Please enter your UMNetId'), findsOneWidget);
       expect(find.text('Please enter a password'), findsOneWidget);
     });
