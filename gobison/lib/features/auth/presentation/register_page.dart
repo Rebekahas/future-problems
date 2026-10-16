@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_colors.dart';
+import '../../../core/theme/app_colors.dart';
+import '../validators/auth_validators.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -28,39 +29,6 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
-  String? _validateRequired(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'This field is required';
-    }
-    return null;
-  }
-
-  String? _validateEmail(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Please enter your email';
-    }
-
-    final UMNetId = value.trim();
-
-    if (UMNetId.contains('@')) {
-      return 'Enter the UMNetId part of your email only, without @ or a domain';
-    }
-
-    return null;
-  }
-
-  String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter a password';
-    }
-
-    if (value.length < 8) {
-      return 'Password must be at least 8 characters';
-    }
-
-    return null;
-  }
-
   void _register() {
     if (_formKey.currentState!.validate()) {
       // TODO: Send the registration details to backend API.
@@ -72,6 +40,7 @@ class _RegisterPageState extends State<RegisterPage> {
     required String hint,
     required TextEditingController controller,
     required IconData icon,
+    bool includesAsterisk = true,
     bool obscureText = false,
     Widget? suffixIcon,
     String? Function(String?)? validator,
@@ -81,7 +50,7 @@ class _RegisterPageState extends State<RegisterPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          label,
+          label + (includesAsterisk ? ' *' : ''),
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -216,7 +185,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       hint: 'Enter your first name',
                       controller: _firstNameController,
                       icon: Icons.person_outline,
-                      validator: _validateRequired,
+                      validator: AuthValidators.validateRequired,
                     ),
 
                     const SizedBox(height: 20),
@@ -227,7 +196,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       hint: 'Enter your last name',
                       controller: _lastNameController,
                       icon: Icons.person_outline,
-                      validator: _validateRequired,
+                      includesAsterisk: false,
                     ),
 
                     const SizedBox(height: 20),
@@ -239,7 +208,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       controller: _emailController,
                       icon: Icons.email_outlined,
                       keyboardType: TextInputType.emailAddress,
-                      validator: _validateEmail,
+                      validator: AuthValidators.validateEmail,
                       suffixIcon: const Padding(
                         padding: EdgeInsets.only(right: 12),
                         child: Center(
@@ -264,7 +233,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       controller: _passwordController,
                       icon: Icons.lock_outline,
                       obscureText: _obscurePassword,
-                      validator: _validatePassword,
+                      validator: AuthValidators.validatePassword,
                       suffixIcon: IconButton(
                         tooltip: _obscurePassword
                             ? 'Show password'

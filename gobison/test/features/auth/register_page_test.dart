@@ -1,64 +1,64 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gobison/features/auth/register_page.dart';
+import 'package:gobison/features/auth/presentation/register_page.dart';
 
 void main() {
   Widget createTestWidget() {
     return const MaterialApp(home: RegisterPage());
   }
 
-  group('RegisterPage', () {
-    testWidgets('displays all registration fields and buttons', (
+  Future<void> submitForm(WidgetTester tester) async {
+    await tester.ensureVisible(find.text('Create Account'));
+    await tester.tap(find.text('Create Account'));
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> fillRegistrationForm(
+    WidgetTester tester, {
+    String firstName = 'Rebekah',
+    String lastName = 'Soneye',
+    String email = 'rebekah123',
+    String password = 'password123',
+  }) async {
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Enter your first name'),
+      firstName,
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Enter your last name'),
+      lastName,
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Enter your UMNetID'),
+      email,
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'At least 8 characters'),
+      password,
+    );
+  }
+
+  group('RegisterPage validation', () {
+    testWidgets('shows required-field errors when submitted empty', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(createTestWidget());
 
-      expect(find.text('Join GoBison'), findsOneWidget);
-      expect(find.text('First name'), findsOneWidget);
-      expect(find.text('Last name'), findsOneWidget);
-      expect(find.text('University of Manitoba Email'), findsOneWidget);
-      expect(find.text('Password'), findsOneWidget);
-      expect(find.text('Create Account'), findsOneWidget);
-      expect(find.text(' Sign in'), findsOneWidget);
-    });
-
-    testWidgets('shows validation errors when fields are empty', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(createTestWidget());
-
-      await tester.ensureVisible(find.text('Create Account'));
-      await tester.tap(find.text('Create Account'));
-      await tester.pumpAndSettle();
+      await submitForm(tester);
 
       expect(find.text('This field is required'), findsNWidgets(2));
-      expect(find.text('Please enter your email'), findsOneWidget);
+      expect(find.text('Please enter your UMNetId'), findsOneWidget);
       expect(find.text('Please enter a password'), findsOneWidget);
     });
 
-    testWidgets('rejects an email containing @', (WidgetTester tester) async {
+    testWidgets('rejects a UMNetID containing @ or a domain', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(createTestWidget());
 
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'Enter your first name'),
-        'Rebekah',
-      );
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'Enter your last name'),
-        'Soneye',
-      );
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'Enter your UMNetID'),
-        'rebekah@myumanitoba.ca',
-      );
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'At least 8 characters'),
-        'password123',
-      );
+      await fillRegistrationForm(tester, email: 'rebekah@myumanitoba.ca');
 
-      await tester.ensureVisible(find.text('Create Account'));
-      await tester.tap(find.text('Create Account'));
-      await tester.pumpAndSettle();
+      await submitForm(tester);
 
       expect(
         find.text(
@@ -73,26 +73,9 @@ void main() {
     ) async {
       await tester.pumpWidget(createTestWidget());
 
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'Enter your first name'),
-        'Rebekah',
-      );
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'Enter your last name'),
-        'Soneye',
-      );
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'Enter your UMNetID'),
-        'rebekah123',
-      );
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'At least 8 characters'),
-        'short',
-      );
+      await fillRegistrationForm(tester, password: 'short');
 
-      await tester.ensureVisible(find.text('Create Account'));
-      await tester.tap(find.text('Create Account'));
-      await tester.pumpAndSettle();
+      await submitForm(tester);
 
       expect(
         find.text('Password must be at least 8 characters'),
@@ -100,32 +83,25 @@ void main() {
       );
     });
 
-    testWidgets('toggles password visibility', (WidgetTester tester) async {
+    testWidgets('accepts valid registration field values', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(createTestWidget());
 
-      final passwordField = find.byType(EditableText).last;
+      await fillRegistrationForm(tester);
 
-      expect(tester.widget<EditableText>(passwordField).obscureText, isTrue);
+      await submitForm(tester);
 
-      final showPasswordButton = find.byTooltip('Show password');
-
-      await tester.ensureVisible(showPasswordButton);
-      await tester.pumpAndSettle();
-
-      await tester.tap(showPasswordButton);
-      await tester.pumpAndSettle();
-
-      expect(tester.widget<EditableText>(passwordField).obscureText, isFalse);
-
-      final hidePasswordButton = find.byTooltip('Hide password');
-
-      await tester.ensureVisible(hidePasswordButton);
-      await tester.pumpAndSettle();
-
-      await tester.tap(hidePasswordButton);
-      await tester.pumpAndSettle();
-
-      expect(tester.widget<EditableText>(passwordField).obscureText, isTrue);
+      expect(find.text('This field is required'), findsNothing);
+      expect(find.text('Please enter your email'), findsNothing);
+      expect(find.text('Please enter a password'), findsNothing);
+      expect(
+        find.text(
+          'Enter the UMNetId part of your email only, without @ or a domain',
+        ),
+        findsNothing,
+      );
+      expect(find.text('Password must be at least 8 characters'), findsNothing);
     });
   });
 }

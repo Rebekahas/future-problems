@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'features/auth/register_page.dart';
+import 'features/auth/presentation/register_page.dart';
 
 void main() {
   runApp(const GoBisonApp());
