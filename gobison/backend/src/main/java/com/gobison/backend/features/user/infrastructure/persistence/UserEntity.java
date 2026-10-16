@@ -8,6 +8,7 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "users")
 
+//maps the user record to PostgreSQL using JPA
 public class UserEntity {
     
     @Id

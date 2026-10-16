@@ -1,3 +1,4 @@
+
 package com.gobison.backend.features.user.infrastructure.persistence;
 
 import com.gobison.backend.features.user.domain.model.User;
@@ -7,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+//implements the domain interface by calling the JPA repository and converting between User and UserEntity
 @Repository
 public class UserRepositoryImpl implements UserRepository {
 
