@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/navigation/no_animation_page_route.dart';
-import '../validators/auth_validators.dart';
 import 'login_page.dart';
+import '../auth_validators.dart';
+import '../auth_controller.dart';
+import '../auth_service.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -14,6 +16,16 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
+  late final AuthService _authService;
+  late final AuthController _authController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _authService = AuthService();
+    _authController = AuthController(_authService);
+  }
 
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
@@ -28,12 +40,28 @@ class _RegisterPageState extends State<RegisterPage> {
     _lastNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _authController.dispose();
     super.dispose();
   }
 
-  void _register() {
-    if (_formKey.currentState!.validate()) {
-      // TODO: Send the registration details to backend API.
+  Future<void> _register() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    await _authController.register(
+      firstName: _firstNameController.text.trim(),
+      lastName: _lastNameController.text.trim(),
+      email: _emailController.text.trim() + '@myumanitoba.ca',
+      password: _passwordController.text,
+    );
+
+    if (!mounted) return;
+
+    if (_authController.registeredUser != null) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const RegisterPage()),
+      );
     }
   }
 
@@ -66,6 +94,7 @@ class _RegisterPageState extends State<RegisterPage> {
           keyboardType: keyboardType,
           validator: validator,
           decoration: InputDecoration(
+            errorMaxLines: 3,
             hintText: hint,
             prefixIcon: Icon(icon, color: AppColors.primary, size: 20),
             suffixIcon: suffixIcon,
@@ -114,216 +143,268 @@ class _RegisterPageState extends State<RegisterPage> {
             padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 400),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // GoBison logo
-                    Center(
-                      child: Container(
-                        width: 1006,
-                        height: 90,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
+
+              child: ListenableBuilder(
+                listenable: _authController,
+                builder: (context, child) {
+                  return Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // GoBison logo
+                        Center(
+                          child: Container(
+                            width: 1006,
+                            height: 90,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primary,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  padding: const EdgeInsets.all(7),
-                                  child: const Icon(
-                                    Icons.directions_car_rounded,
-                                    color: Colors.white,
-                                    size: 40,
-                                  ),
-                                ),
-                                const SizedBox(width: 2),
-                                Image.asset(
-                                  'assets/images/umanitoba_bisons_logo.png',
-                                  height: 70,
-                                  fit: BoxFit.contain,
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primary,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      padding: const EdgeInsets.all(7),
+                                      child: const Icon(
+                                        Icons.directions_car_rounded,
+                                        color: Colors.white,
+                                        size: 40,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 2),
+                                    Image.asset(
+                                      'assets/images/umanitoba_bisons_logo.png',
+                                      height: 70,
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
+                          ),
+                        ),
+
+                        // const SizedBox(height: 4),
+                        const Text(
+                          'Join GoBison',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        const Text(
+                          'Your campus journey starts here.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+
+                        const SizedBox(height: 32),
+
+                        // First name
+                        _buildTextField(
+                          label: 'First name',
+                          hint: 'Enter your first name',
+                          controller: _firstNameController,
+                          icon: Icons.person_outline,
+                          validator: AuthValidators.validateRequired,
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // Last name
+                        _buildTextField(
+                          label: 'Last name',
+                          hint: 'Enter your last name',
+                          controller: _lastNameController,
+                          icon: Icons.person_outline,
+                          includesAsterisk: false,
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // Email
+                        _buildTextField(
+                          label: 'University of Manitoba Email',
+                          hint: 'Enter your UMNetID',
+                          controller: _emailController,
+                          icon: Icons.email_outlined,
+                          keyboardType: TextInputType.emailAddress,
+                          validator: AuthValidators.validateEmail,
+                          suffixIcon: const Padding(
+                            padding: EdgeInsets.only(right: 12),
+                            child: Center(
+                              widthFactor: 1,
+                              child: Text(
+                                '@myumanitoba.ca',
+                                style: TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // Password
+                        _buildTextField(
+                          label: 'Password',
+                          hint: 'Please enter a password',
+                          controller: _passwordController,
+                          icon: Icons.lock_outline,
+                          obscureText: _obscurePassword,
+                          validator: AuthValidators.validatePassword,
+                          suffixIcon: IconButton(
+                            tooltip: _obscurePassword
+                                ? 'Show password'
+                                : 'Hide password',
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                              color: AppColors.textSecondary,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                          ),
+                        ),
+
+                        const SizedBox(height: 28),
+                        if (_authController.errorMessage != null) ...[
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: AppColors.error.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: AppColors.error.withValues(alpha: 0.4),
+                              ),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.error_outline,
+                                  color: AppColors.error,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    _authController.errorMessage!,
+                                    style: TextStyle(
+                                      color: AppColors.error,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                        ],
+                        // Create account button
+                        SizedBox(
+                          height: 54,
+                          child: ElevatedButton(
+                            onPressed: _authController.isLoading
+                                ? null
+                                : _register,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: _authController.isLoading
+                                ? const SizedBox(
+                                    height: 24,
+                                    width: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : const Text(
+                                    'Create Account',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 24),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Flexible(
+                              child: Text(
+                                'Already have an account?',
+                                textAlign: TextAlign.end,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pushReplacement(
+                                  context,
+                                  NoAnimationPageRoute(
+                                    builder: (context) => const LoginPage(),
+                                  ),
+                                );
+                              },
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppColors.primary,
+                                padding: EdgeInsets.zero,
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: const Text(
+                                ' Sign in',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
                           ],
                         ),
-                      ),
-                    ),
+                        const SizedBox(height: 12),
 
-                    const Text(
-                      'Join GoBison',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    const Text(
-                      'Your campus journey starts here.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-
-                    const SizedBox(height: 32),
-
-                    // First name
-                    _buildTextField(
-                      label: 'First name',
-                      hint: 'Enter your first name',
-                      controller: _firstNameController,
-                      icon: Icons.person_outline,
-                      validator: AuthValidators.validateRequired,
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // Last name
-                    _buildTextField(
-                      label: 'Last name',
-                      hint: 'Enter your last name',
-                      controller: _lastNameController,
-                      icon: Icons.person_outline,
-                      includesAsterisk: false,
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // Email
-                    _buildTextField(
-                      label: 'University of Manitoba Email',
-                      hint: 'Enter your UMNetID',
-                      controller: _emailController,
-                      icon: Icons.email_outlined,
-                      keyboardType: TextInputType.emailAddress,
-                      validator: AuthValidators.validateEmail,
-                      suffixIcon: const Padding(
-                        padding: EdgeInsets.only(right: 12),
-                        child: Center(
-                          widthFactor: 1,
-                          child: Text(
-                            '@myumanitoba.ca',
-                            style: TextStyle(
-                              color: AppColors.textSecondary,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // Password
-                    _buildTextField(
-                      label: 'Password',
-                      hint: 'At least 8 characters',
-                      controller: _passwordController,
-                      icon: Icons.lock_outline,
-                      obscureText: _obscurePassword,
-                      validator: AuthValidators.validatePassword,
-                      suffixIcon: IconButton(
-                        tooltip: _obscurePassword
-                            ? 'Show password'
-                            : 'Hide password',
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
-                          color: AppColors.textSecondary,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                      ),
-                    ),
-
-                    const SizedBox(height: 28),
-
-                    // Create account button
-                    SizedBox(
-                      height: 54,
-                      child: ElevatedButton(
-                        onPressed: _register,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text(
-                          'Create Account',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Flexible(
-                          child: Text(
-                            'Already have an account?',
-                            textAlign: TextAlign.end,
-                            style: TextStyle(color: Colors.black, fontSize: 14),
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pushReplacement(
-                              context,
-                              NoAnimationPageRoute(
-                                builder: (context) => const LoginPage(),
-                              ),
-                            );
-                          },
-                          style: TextButton.styleFrom(
-                            foregroundColor: AppColors.primary,
-                            padding: EdgeInsets.zero,
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: const Text(
-                            ' Sign in',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                          ),
+                        const Text(
+                          'GoBison • Ride with the herd.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 12, color: Colors.black38),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
-
-                    const Text(
-                      'GoBison • Ride with the herd.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 12, color: Colors.black38),
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
             ),
           ),
