@@ -29,3 +29,10 @@ jobs:
           - name: Run tests
             working-directory: gobison
             run: flutter test --coverage
+        
+          - name: Upload coverage report
+            uses: actions/upload-artifact@v7
+            with:
+                name: flutter-coverage
+                path: gobison/coverage/lcov.info
+                if-no-files-found: error
