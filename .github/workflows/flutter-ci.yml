@@ -1,0 +1,31 @@
+name: Flutter CI
+
+on:
+    push:
+    pull_request:
+
+jobs:
+    flutter-check:
+        runs-on: ubuntu-latest
+
+        steps:
+          - name: Download project code
+            uses: actions/checkout@v6
+
+          - name: Set up Flutter
+            uses: subosito/flutter-action@v2
+            with:
+                flutter-version: '3.47.7'
+                channel: stable
+        
+          - name: Install dependencies
+            working-directory: gobison
+            run: flutter pub get
+          
+          - name: Analyze code
+            working-directory: gobison
+            run: flutter analyze
+        
+          - name: Run tests
+            working-directory: gobison
+            run: flutter test --coverage
