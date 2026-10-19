@@ -6,6 +6,7 @@ import 'register_page.dart';
 import '../auth_validators.dart';
 import '../auth_controller.dart';
 import '../auth_service.dart';
+import '../../../core/widgets/go_bison_logo.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -144,35 +145,7 @@ class _LoginPageState extends State<LoginPage> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         // GoBison logo
-                        Center(
-                          child: SizedBox(
-                            height: 90,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primary,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  padding: const EdgeInsets.all(7),
-                                  child: const Icon(
-                                    Icons.directions_car_rounded,
-                                    color: Colors.white,
-                                    size: 40,
-                                  ),
-                                ),
-                                const SizedBox(width: 2),
-                                Image.asset(
-                                  'assets/images/umanitoba_bisons_logo.png',
-                                  height: 70,
-                                  fit: BoxFit.contain,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-
+                        GoBisonLogo(height: 100),
                         const Text(
                           'Welcome Back!',
                           textAlign: TextAlign.center,

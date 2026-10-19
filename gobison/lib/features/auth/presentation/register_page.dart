@@ -6,6 +6,7 @@ import 'login_page.dart';
 import '../auth_validators.dart';
 import '../auth_controller.dart';
 import '../auth_service.dart';
+import '../../../core/widgets/go_bison_logo.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -62,7 +63,7 @@ class _RegisterPageState extends State<RegisterPage> {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (_) => const RegisterPage(),
-        ), // TODO: Navigate to the home page after successful registration.
+        ), // TODO: Account verificationpage
       );
     }
   }
@@ -154,43 +155,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // GoBison logo
-                        Center(
-                          child: Container(
-                            width: 1006,
-                            height: 90,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        color: AppColors.primary,
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      padding: const EdgeInsets.all(7),
-                                      child: const Icon(
-                                        Icons.directions_car_rounded,
-                                        color: Colors.white,
-                                        size: 40,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 2),
-                                    Image.asset(
-                                      'assets/images/umanitoba_bisons_logo.png',
-                                      height: 70,
-                                      fit: BoxFit.contain,
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-
+                        GoBisonLogo(height: 90),
                         // const SizedBox(height: 4),
                         const Text(
                           'Join GoBison',
