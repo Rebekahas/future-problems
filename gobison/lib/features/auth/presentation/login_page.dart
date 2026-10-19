@@ -117,7 +117,6 @@ class _LoginPageState extends State<LoginPage> {
                     // GoBison logo
                     Center(
                       child: Container(
-                        width: 1006,
                         height: 90,
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
