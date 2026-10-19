@@ -60,7 +60,9 @@ class _RegisterPageState extends State<RegisterPage> {
 
     if (_authController.registeredUser != null) {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const RegisterPage()),
+        MaterialPageRoute(
+          builder: (_) => const RegisterPage(),
+        ), // TODO: Navigate to the home page after successful registration.
       );
     }
   }

@@ -23,9 +23,9 @@ class AuthResponseHandler {
       case 429:
         return 'Too many registration attempts. Please try again later.';
       case 500:
-        return 'Something went wrong on our end. Please try again later.';
+        return 'It\'s not you, it\'s us. Please try again later.';
       default:
-        return 'Unable to register. Please check your connection and try again.';
+        return 'Unable to register. Please try again.';
     }
   }
 }

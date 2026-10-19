@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/navigation/no_animation_page_route.dart';
 import 'register_page.dart';
-import '../validators/auth_validators.dart';
+import '../auth_validators.dart';
+import '../auth_controller.dart';
+import '../auth_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -14,22 +16,46 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  late final AuthService _authService;
+  late final AuthController _authController;
+
   bool _obscurePassword = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _authService = AuthService();
+    _authController = AuthController(_authService);
+  }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _authController.dispose();
     super.dispose();
   }
 
-  void _login() {
-    if (_formKey.currentState!.validate()) {
-      // TODO: Send the login details to backend API.
+  Future<void> _login() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    await _authController.login(
+      email: _emailController.text.trim() + '@myumanitoba.ca',
+      password: _passwordController.text,
+    );
+
+    if (!mounted) return;
+
+    if (_authController.registeredUser != null) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => const LoginPage(),
+        ), // TODO: Navigate to the home page after successful registration.
+      );
     }
   }
 
@@ -109,21 +135,20 @@ class _LoginPageState extends State<LoginPage> {
             padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 400),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // GoBison logo
-                    Center(
-                      child: Container(
-                        height: 90,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Row(
+              child: ListenableBuilder(
+                listenable: _authController,
+                builder: (context, child) {
+                  return Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // GoBison logo
+                        Center(
+                          child: SizedBox(
+                            height: 90,
+                            child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Container(
                                   decoration: BoxDecoration(
@@ -145,175 +170,220 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               ],
                             ),
+                          ),
+                        ),
+
+                        const Text(
+                          'Welcome Back!',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        const Text(
+                          'Log in to your GoBison account to continue your campus journey.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: AppColors.textSecondary,
+                            height: 1.5,
+                          ),
+                        ),
+                        const SizedBox(height: 48),
+
+                        // Email
+                        _buildTextField(
+                          label: 'University of Manitoba Email',
+                          hint: 'Enter your UMNetID',
+                          controller: _emailController,
+                          icon: Icons.email_outlined,
+                          keyboardType: TextInputType.emailAddress,
+                          validator: AuthValidators.validateRequired,
+                          suffixIcon: const Padding(
+                            padding: EdgeInsets.only(right: 12),
+                            child: Center(
+                              widthFactor: 1,
+                              child: Text(
+                                '@myumanitoba.ca',
+                                style: TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // Password
+                        _buildTextField(
+                          label: 'Password',
+                          hint: 'Enter your password',
+                          controller: _passwordController,
+                          icon: Icons.lock_outline,
+                          obscureText: _obscurePassword,
+                          validator: AuthValidators.validateRequired,
+                          suffixIcon: IconButton(
+                            tooltip: _obscurePassword
+                                ? 'Show password'
+                                : 'Hide password',
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                              color: AppColors.textSecondary,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                          ),
+                        ),
+
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () {
+                              // TODO: Implement forgot password.
+                            },
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.primary,
+                              padding: const EdgeInsets.all(5),
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            child: const Text(
+                              'Forgot password?',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 28),
+
+                        if (_authController.errorMessage != null) ...[
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: AppColors.error.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: AppColors.error.withValues(alpha: 0.4),
+                              ),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(
+                                  Icons.error_outline,
+                                  color: AppColors.error,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    _authController.errorMessage!,
+                                    style: const TextStyle(
+                                      color: AppColors.error,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+
+                        // Sign In button
+                        SizedBox(
+                          height: 54,
+                          child: ElevatedButton(
+                            onPressed: _authController.isLoading
+                                ? null
+                                : _login,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: _authController.isLoading
+                                ? const CircularProgressIndicator(
+                                    color: Colors.white,
+                                  )
+                                : const Text(
+                                    'Sign In',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Flexible(
+                              child: Text(
+                                'Don\'t have an account?',
+                                textAlign: TextAlign.end,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pushReplacement(
+                                  context,
+                                  NoAnimationPageRoute(
+                                    builder: (context) => const RegisterPage(),
+                                  ),
+                                );
+                              },
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppColors.primary,
+                                padding: EdgeInsets.zero,
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: const Text(
+                                ' Sign Up',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
                           ],
                         ),
-                      ),
-                    ),
 
-                    // const SizedBox(height: 4),
-                    const Text(
-                      'Welcome Back!',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
+                        const SizedBox(height: 12),
 
-                    const Text(
-                      'Log in to your GoBison account to continue your campus journey.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: AppColors.textSecondary,
-                        height: 1.5,
-                      ),
-                    ),
-                    const SizedBox(height: 48),
-                    // Email
-                    _buildTextField(
-                      label: 'University of Manitoba Email',
-                      hint: 'Enter your UMNetID',
-                      controller: _emailController,
-                      icon: Icons.email_outlined,
-                      keyboardType: TextInputType.emailAddress,
-                      validator: AuthValidators.validateRequired,
-                      suffixIcon: const Padding(
-                        padding: EdgeInsets.only(right: 12),
-                        child: Center(
-                          widthFactor: 1,
-                          child: Text(
-                            '@myumanitoba.ca',
-                            style: TextStyle(
-                              color: AppColors.textSecondary,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // Password
-                    _buildTextField(
-                      label: 'Password',
-                      hint: 'Enter your password',
-                      controller: _passwordController,
-                      icon: Icons.lock_outline,
-                      obscureText: _obscurePassword,
-                      validator: AuthValidators.validateRequired,
-                      suffixIcon: IconButton(
-                        tooltip: _obscurePassword
-                            ? 'Show password'
-                            : 'Hide password',
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
-                          color: AppColors.textSecondary,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {
-                          // TODO: Implement forgot password functionality.
-                        },
-                        style: TextButton.styleFrom(
-                          foregroundColor: AppColors.primary,
-                          padding: EdgeInsets.all(5),
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        child: const Text(
-                          'Forgot password?',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 28),
-
-                    // Create account button
-                    SizedBox(
-                      height: 54,
-                      child: ElevatedButton(
-                        onPressed: _login,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text(
-                          'Sign In',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Flexible(
-                          child: Text(
-                            'Don\'t have an account?',
-                            textAlign: TextAlign.end,
-                            style: TextStyle(color: Colors.black, fontSize: 14),
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pushReplacement(
-                              context,
-                              NoAnimationPageRoute(
-                                builder: (context) => const RegisterPage(),
-                              ),
-                            );
-                          },
-                          style: TextButton.styleFrom(
-                            foregroundColor: AppColors.primary,
-                            padding: EdgeInsets.zero,
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: const Text(
-                            ' Sign Up',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                          ),
+                        const Text(
+                          'GoBison • Ride with the herd.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 12, color: Colors.black38),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
-
-                    const Text(
-                      'GoBison • Ride with the herd.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 12, color: Colors.black38),
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
             ),
           ),

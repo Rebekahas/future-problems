@@ -1,10 +1,14 @@
-import '../../../core/network/api_config.dart';
-
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../../../core/network/api_config.dart';
+
 class AuthService {
+  final http.Client _client;
+
+  AuthService({http.Client? client}) : _client = client ?? http.Client();
+
   Future<Map<String, dynamic>> register({
     required String firstName,
     String lastName = '',
@@ -13,7 +17,7 @@ class AuthService {
   }) async {
     final uri = Uri.parse('${ApiConfig.baseUrl}/api/v1/auth/register');
 
-    final response = await http.post(
+    final response = await _client.post(
       uri,
       headers: {
         'Content-Type': 'application/json',
@@ -43,7 +47,7 @@ class AuthService {
   }) async {
     final uri = Uri.parse('${ApiConfig.baseUrl}/api/v1/auth/login');
 
-    final response = await http.post(
+    final response = await _client.post(
       uri,
       headers: {
         'Content-Type': 'application/json',

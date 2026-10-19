@@ -26,10 +26,6 @@ class AuthController extends ChangeNotifier {
     errorMessage = null;
     notifyListeners();
 
-    await Future.delayed(
-      const Duration(seconds: 5),
-    ); // TODO: Remove this line after backend connection (mimicks loading)
-
     try {
       final data = await _authService.register(
         firstName: firstName,
@@ -53,10 +49,6 @@ class AuthController extends ChangeNotifier {
     isLoading = true;
     errorMessage = null;
     notifyListeners();
-
-    await Future.delayed(
-      const Duration(seconds: 5),
-    ); // TODO: Remove after backend connection
 
     try {
       await _authService.login(email: email, password: password);
