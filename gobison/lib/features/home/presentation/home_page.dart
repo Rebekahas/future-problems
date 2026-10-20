@@ -52,7 +52,7 @@ class HomePage extends StatelessWidget {
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 480),
+              constraints: const BoxConstraints(maxWidth: 580),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
