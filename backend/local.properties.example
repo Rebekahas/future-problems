@@ -1,3 +1,5 @@
 SUPABASE_DB_URL=the_url
 SUPABASE_DB_USERNAME=fake_username
 SUPABASE_DB_PASSWORD=fake_password
+
+MAIL_PASSWORD=
