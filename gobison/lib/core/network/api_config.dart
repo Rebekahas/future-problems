@@ -10,6 +10,6 @@ class ApiConfig {
       }
     }
 
-    return 'https://your-production-server.com';
+    return 'https://production-server.com'; //TODO: Replace with actual API url
   }
 }
