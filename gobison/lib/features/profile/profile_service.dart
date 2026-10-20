@@ -20,8 +20,6 @@ class ProfileService {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        // Add your existing session/authentication mechanism here
-        // if it is not already handled by the HTTP client.
       },
       body: jsonEncode(changes),
     );

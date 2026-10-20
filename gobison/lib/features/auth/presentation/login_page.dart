@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/navigation/no_animation_page_route.dart';
 import 'register_page.dart';
+import 'session_gate.dart';
 import '../auth_validators.dart';
 import '../auth_controller.dart';
 import '../auth_service.dart';
@@ -44,6 +45,7 @@ class _LoginPageState extends State<LoginPage> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
+
     await _authController.login(
       email: _emailController.text.trim() + '@myumanitoba.ca',
       password: _passwordController.text,
@@ -51,11 +53,12 @@ class _LoginPageState extends State<LoginPage> {
 
     if (!mounted) return;
 
-    if (_authController.registeredUser != null) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => const LoginPage(),
-        ), // TODO: Navigate to the home page after successful registration.
+    // Replace this condition with your controller's actual
+    // login-success check.
+    if (_authController.errorMessage == null) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const SessionGate()),
+        (route) => false,
       );
     }
   }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_colors.dart';
+
 class UserAvatar extends StatelessWidget {
   const UserAvatar({
     super.key,
@@ -47,7 +49,7 @@ class UserAvatar extends StatelessWidget {
               : Text(
                   initials.isEmpty ? '?' : initials,
                   style: TextStyle(
-                    color: const Color(0xFF654321),
+                    color: AppColors.primary,
                     fontSize: radius * 0.65,
                     fontWeight: FontWeight.bold,
                   ),

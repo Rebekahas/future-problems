@@ -82,10 +82,7 @@ class DisplayProfilePage extends StatelessWidget {
       color: Colors.white,
       margin: const EdgeInsets.symmetric(horizontal: 180, vertical: 8),
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12, // Reduce this to make the card shorter
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: ListTile(title: Text(title), subtitle: Text(value)),
       ),
     );

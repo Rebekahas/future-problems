@@ -29,11 +29,5 @@ class SessionService {
 
     //TODO: Implement the actual session loading logic here.
     //The current implementation is a placeholder that returns a hardcoded SessionData object.
-    //The real implementation should perform the following steps:
-    // 1. Check whether the existing session cookie is valid.
-    // 2. Retrieve the current authenticated user.
-    // 3. Fetch GET /api/v1/users/me/profile.
-    // 4. Return SessionData(user: user, profile: profile).
-    // 5. Return null if there is no valid authenticated session.
   }
 }

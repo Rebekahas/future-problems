@@ -57,7 +57,7 @@ void main() {
     test('saveProfile stores the updated profile after success', () async {
       final updatedProfile = UserProfile(
         userId: '123',
-        firstName: 'Rebekah',
+        firstName: 'Rebecca',
         lastName: 'Soneye',
         age: 22,
         gender: 'Female',
@@ -73,7 +73,7 @@ void main() {
 
       await controller.saveProfile(
         currentProfile: currentProfile,
-        firstName: 'Rebekah',
+        firstName: 'Rebecca',
         lastName: 'Soneye',
         age: '22',
         gender: 'Female',
@@ -83,7 +83,7 @@ void main() {
       expect(controller.updatedProfile, same(updatedProfile));
       expect(controller.errorMessage, isNull);
       expect(controller.isLoading, isFalse);
-      expect(receivedChanges, {'firstName': 'Rebekah'});
+      expect(receivedChanges, {'firstName': 'Rebecca'});
     });
 
     test('saveProfile trims input before sending changes', () async {

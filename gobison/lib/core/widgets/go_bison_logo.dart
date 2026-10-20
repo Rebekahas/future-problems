@@ -12,7 +12,7 @@ class GoBisonLogo extends StatelessWidget {
       child: Center(
         child: Image.asset(
           'assets/images/go_bison_logo.png',
-          height: height * (70 / 90),
+          height: height,
           fit: BoxFit.contain,
         ),
       ),

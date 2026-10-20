@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gobison/features/auth/presentation/session_gate.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/navigation/no_animation_page_route.dart';
@@ -60,11 +61,9 @@ class _RegisterPageState extends State<RegisterPage> {
     if (!mounted) return;
 
     if (_authController.registeredUser != null) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => const RegisterPage(),
-        ), // TODO: Account verificationpage
-      );
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => const SessionGate()));
     }
   }
 
@@ -155,8 +154,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        GoBisonLogo(height: 90),
-                        // const SizedBox(height: 4),
+                        GoBisonLogo(height: 70),
                         const Text(
                           'Join GoBison',
                           textAlign: TextAlign.center,
