@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/navigation/no_animation_page_route.dart';
 import 'register_page.dart';
+import 'session_gate.dart';
 import '../auth_validators.dart';
 import '../auth_controller.dart';
 import '../auth_service.dart';
+import '../../../core/widgets/go_bison_logo.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -43,6 +45,7 @@ class _LoginPageState extends State<LoginPage> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
+
     await _authController.login(
       email: _emailController.text.trim() + '@myumanitoba.ca',
       password: _passwordController.text,
@@ -50,11 +53,10 @@ class _LoginPageState extends State<LoginPage> {
 
     if (!mounted) return;
 
-    if (_authController.registeredUser != null) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => const LoginPage(),
-        ), // TODO: Navigate to the home page after successful registration.
+    if (_authController.errorMessage == null) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const SessionGate()),
+        (route) => false,
       );
     }
   }
@@ -144,35 +146,7 @@ class _LoginPageState extends State<LoginPage> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         // GoBison logo
-                        Center(
-                          child: SizedBox(
-                            height: 90,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primary,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  padding: const EdgeInsets.all(7),
-                                  child: const Icon(
-                                    Icons.directions_car_rounded,
-                                    color: Colors.white,
-                                    size: 40,
-                                  ),
-                                ),
-                                const SizedBox(width: 2),
-                                Image.asset(
-                                  'assets/images/umanitoba_bisons_logo.png',
-                                  height: 70,
-                                  fit: BoxFit.contain,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-
+                        GoBisonLogo(height: 100),
                         const Text(
                           'Welcome Back!',
                           textAlign: TextAlign.center,

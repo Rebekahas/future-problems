@@ -7,7 +7,7 @@ class User {
   const User({
     required this.id,
     required this.firstName,
-    required this.lastName,
+    this.lastName = '',
     required this.email,
   });
 
