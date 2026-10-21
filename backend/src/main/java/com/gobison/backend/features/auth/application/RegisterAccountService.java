@@ -47,7 +47,7 @@ public class RegisterAccountService {
         if (!EMAIL_FORMAT.matcher(normalizedEmail).matches()) {
             throw new RegisterAccountException(INVALID_REQUEST);
         }
-
+        // TODO consider storing when accounts were created for record keeping purposes
         Instant createdAt = Instant.now();
         User user = new User(normalizedEmail, passwordEncoder.encode(password), firstName.trim(), lastName.trim(),
                 false);
