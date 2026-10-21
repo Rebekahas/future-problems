@@ -5,8 +5,8 @@ public class User {
     private String email;
     private String firstName;
     private String lastName;
-    private boolean verified;
-    private String verificationCode;
+    private boolean verified; // TODO ask about storing this on the database
+    private String verificationCode; // TODO ask about storing this on the database
     private String password;
 
     public User(String email, String password, String firstName,
