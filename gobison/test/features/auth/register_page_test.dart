@@ -18,7 +18,7 @@ void main() {
     String firstName = 'Rebekah',
     String lastName = 'Soneye',
     String email = 'rebekah123',
-    String password = 'password123',
+    String password = 'Password123',
   }) async {
     await tester.enterText(
       find.widgetWithText(TextFormField, 'Enter your first name'),
@@ -33,7 +33,7 @@ void main() {
       email,
     );
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'At least 8 characters'),
+      find.widgetWithText(TextFormField, 'Please enter a password'),
       password,
     );
   }
@@ -46,9 +46,9 @@ void main() {
 
       await submitForm(tester);
 
-      expect(find.text('This field is required'), findsNWidgets(1));
+      expect(find.text('This field is required'), findsOneWidget);
       expect(find.text('Please enter your UMNetId'), findsOneWidget);
-      expect(find.text('Please enter a password'), findsOneWidget);
+      expect(find.text('Please enter a password'), findsNWidgets(2));
     });
 
     testWidgets('rejects a UMNetID containing @ or a domain', (
@@ -73,13 +73,78 @@ void main() {
     ) async {
       await tester.pumpWidget(createTestWidget());
 
-      await fillRegistrationForm(tester, password: 'short');
-
+      await fillRegistrationForm(tester, password: 'Pass123');
       await submitForm(tester);
 
       expect(
-        find.text('Password must be at least 8 characters'),
+        find.text(
+          'Your password must be at least 8 characters and include an uppercase letter, a lowercase letter and a number.',
+        ),
         findsOneWidget,
+      );
+    });
+
+    testWidgets('rejects a password without an uppercase letter', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(createTestWidget());
+
+      await fillRegistrationForm(tester, password: 'password123');
+      await submitForm(tester);
+
+      expect(
+        find.text(
+          'Your password must be at least 8 characters and include an uppercase letter, a lowercase letter and a number.',
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('rejects a password without a lowercase letter', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(createTestWidget());
+
+      await fillRegistrationForm(tester, password: 'PASSWORD123');
+      await submitForm(tester);
+
+      expect(
+        find.text(
+          'Your password must be at least 8 characters and include an uppercase letter, a lowercase letter and a number.',
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('rejects a password without a number', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(createTestWidget());
+
+      await fillRegistrationForm(tester, password: 'PasswordABC');
+      await submitForm(tester);
+
+      expect(
+        find.text(
+          'Your password must be at least 8 characters and include an uppercase letter, a lowercase letter and a number.',
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('accepts a password meeting all requirements', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(createTestWidget());
+
+      await fillRegistrationForm(tester, password: 'Password123');
+      await submitForm(tester);
+
+      expect(
+        find.text(
+          'Your password must be at least 8 characters and include an uppercase letter, a lowercase letter and a number.',
+        ),
+        findsNothing,
       );
     });
 
@@ -89,19 +154,27 @@ void main() {
       await tester.pumpWidget(createTestWidget());
 
       await fillRegistrationForm(tester);
-
       await submitForm(tester);
 
       expect(find.text('This field is required'), findsNothing);
-      expect(find.text('Please enter your email'), findsNothing);
-      expect(find.text('Please enter a password'), findsNothing);
+      expect(find.text('Please enter your UMNetId'), findsNothing);
+      final passwordField = tester
+          .widgetList<TextFormField>(find.byType(TextFormField))
+          .last;
+
+      expect(passwordField.validator?.call('Password123'), isNull);
       expect(
         find.text(
           'Enter the UMNetId part of your email only, without @ or a domain',
         ),
         findsNothing,
       );
-      expect(find.text('Password must be at least 8 characters'), findsNothing);
+      expect(
+        find.text(
+          'Your password must be at least 8 characters and include an uppercase letter, a lowercase letter and a number.',
+        ),
+        findsNothing,
+      );
     });
   });
 }
