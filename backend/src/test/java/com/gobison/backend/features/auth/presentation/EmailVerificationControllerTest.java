@@ -2,6 +2,7 @@ package com.gobison.backend.features.auth.presentation;
 
 import com.gobison.backend.features.auth.application.EmailVerificationException;
 import com.gobison.backend.features.auth.application.EmailVerificationService;
+import com.gobison.backend.security.SecurityConfiguration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -15,11 +16,12 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static com.gobison.backend.features.auth.application.EmailVerificationException.Reason.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = EmailVerificationController.class, properties = "spring.config.import=")
-@Import(EmailVerificationExceptionHandler.class)
+@Import({EmailVerificationExceptionHandler.class, SecurityConfiguration.class})
 class EmailVerificationControllerTest {
 
     private static final String ENDPOINT = "/api/v1/auth/verify-email";
@@ -29,7 +31,7 @@ class EmailVerificationControllerTest {
 
     @Test
     void usesPrincipalAndReturnsOnlyVerificationStatus() throws Exception {
-        mvc.perform(post(ENDPOINT).principal(() -> "jsmith")
+        mvc.perform(post(ENDPOINT).with(user("jsmith"))
                         .header("X-User-Id", "someone-else")
                         .contentType(MediaType.APPLICATION_JSON).content("{\"code\":\"000042\"}"))
                 .andExpect(status().isOk())
@@ -54,7 +56,7 @@ class EmailVerificationControllerTest {
     @ValueSource(strings = {"{}", "{\"code\":\"12345\"}", "{\"code\":\"1234567\"}",
             "{\"code\":\"abcdef\"}", "{\"code\":\"１２３４５６\"}", "{"})
     void rejectsMissingOrMalformedCode(String body) throws Exception {
-        mvc.perform(post(ENDPOINT).principal(() -> "jsmith")
+        mvc.perform(post(ENDPOINT).with(user("jsmith"))
                         .contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isBadRequest());
         verifyNoInteractions(service);
@@ -83,7 +85,7 @@ class EmailVerificationControllerTest {
     private void expectFailure(RuntimeException exception, int expectedStatus) throws Exception {
         doThrow(exception).when(service).verifyEmail("jsmith", "483921");
 
-        mvc.perform(post(ENDPOINT).principal(() -> "jsmith")
+        mvc.perform(post(ENDPOINT).with(user("jsmith"))
                         .contentType(MediaType.APPLICATION_JSON).content("{\"code\":\"483921\"}"))
                 .andExpect(status().is(expectedStatus))
                 .andExpect(content().string(""));
