@@ -2,24 +2,24 @@ package com.gobison.backend.features.user.domain.model;
 
 public class User {
 
-    private String umNetId;
+    private String email;
     private String firstName;
     private String lastName;
     private boolean verified;
     private String verificationCode;
     private String password;
 
-    public User(String umNetId, String password, String firstName,
+    public User(String email, String password, String firstName,
                 String lastName, boolean verified) {
-        this.umNetId = umNetId;
+        this.email = email;
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
         this.verified = verified;
     }
 
-    public String getUmNetId() {
-        return umNetId;
+    public String getEmail() {
+        return email;
     }
 
     public String getPassword() {
