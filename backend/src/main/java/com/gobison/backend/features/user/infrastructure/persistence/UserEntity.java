@@ -12,8 +12,8 @@ import jakarta.persistence.Table;
 public class UserEntity {
     
     @Id
-    @Column(name = "um_net_id", nullable = false)
-    private String umNetId;
+    @Column(name = "email", nullable = false)
+    private String email;
 
     @Column(name = "password", nullable = false)
     private String password;
@@ -35,20 +35,20 @@ public class UserEntity {
     }
 
     public UserEntity(
-            String umNetId,
+            String email,
             String password,
             String firstName,
             String lastName,
             boolean verified) {
-        this.umNetId = umNetId;
+        this.email = email;
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
         this.verified = verified;
     }
 
-    public String getUmNetId() {
-        return umNetId;
+    public String getEmail() {
+        return email;
     }
 
     public String getPassword() {

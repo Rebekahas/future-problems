@@ -21,20 +21,20 @@ class UserRepositoryImplTest {
     @Autowired
     private UserRepository userRepository;
 
-    private final List<String> testUserIds = new ArrayList<>();
+    private final List<String> testEmails = new ArrayList<>();
 
     private User createTestUser(String firstName, String lastName, boolean verified) {
         String umNetId = "test_" + UUID.randomUUID().toString().replace("-", "");
-        testUserIds.add(umNetId);
+        testEmails.add(umNetId+"myUmanitoba.ca");
         return new User(umNetId, "test-hash-not-a-real-password", firstName, lastName, verified);
     }
 
     @AfterEach
     void cleanUp() {
-        for (String umNetId : testUserIds) {
-            userRepository.deleteByUmNetId(umNetId);
+        for (String email : testEmails) {
+            userRepository.deleteByEmail(email);
         }
-        testUserIds.clear();
+        testEmails.clear();
     }
 
     @Test
@@ -44,7 +44,7 @@ class UserRepositoryImplTest {
         User saved = userRepository.save(user);
 
         assertAll(
-                () -> assertEquals(user.getUmNetId(), saved.getUmNetId()),
+                () -> assertEquals(user.getEmail(), saved.getEmail()),
                 () -> assertEquals(user.getPassword(), saved.getPassword()),
                 () -> assertEquals(user.getFirstName(), saved.getFirstName()),
                 () -> assertEquals(user.getLastName(), saved.getLastName()),
@@ -57,14 +57,14 @@ class UserRepositoryImplTest {
         User user = createTestUser("Kamryn", "Janke", false);
         userRepository.save(user);
 
-        Optional<User> result = userRepository.findByUmNetId(user.getUmNetId());
+        Optional<User> result = userRepository.findByEmail(user.getEmail());
 
         assertTrue(result.isPresent());
 
         User retrieved = result.orElseThrow();
 
         assertAll(
-                () -> assertEquals(user.getUmNetId(), retrieved.getUmNetId()),
+                () -> assertEquals(user.getEmail(), retrieved.getEmail()),
                 () -> assertEquals(user.getPassword(), retrieved.getPassword()),
                 () -> assertEquals("Kamryn", retrieved.getFirstName()),
                 () -> assertEquals("Janke", retrieved.getLastName()),
@@ -76,7 +76,7 @@ class UserRepositoryImplTest {
     void shouldReturnEmptyWhenUserDoesNotExist() {
         String umNetId = "missing_" + UUID.randomUUID().toString().replace("-", "");
 
-        Optional<User> result =userRepository.findByUmNetId(umNetId);
+        Optional<User> result =userRepository.findByEmail(umNetId+"@myumanitoba.ca");
 
         assertTrue(result.isEmpty());
     }
@@ -86,14 +86,14 @@ class UserRepositoryImplTest {
         User user = createTestUser("Sasha", "Coles", false);
         userRepository.save(user);
 
-        assertTrue(userRepository.existsByUmNetId(user.getUmNetId()));
+        assertTrue(userRepository.existsByEmail(user.getEmail()));
     }
 
     @Test
     void shouldReturnFalseWhenUserDoesNotExist() {
         String umNetId = "missing_" + UUID.randomUUID().toString().replace("-", "");
 
-        assertFalse(userRepository.existsByUmNetId(umNetId));
+        assertFalse(userRepository.existsByEmail(umNetId));
     }
 
     @Test
@@ -102,16 +102,16 @@ class UserRepositoryImplTest {
         userRepository.save(user);
 
         assertTrue(
-                userRepository.existsByUmNetId(user.getUmNetId())
+                userRepository.existsByEmail(user.getEmail())
         );
 
-        userRepository.deleteByUmNetId(user.getUmNetId());
+        userRepository.deleteByEmail(user.getEmail());
 
         assertFalse(
-                userRepository.existsByUmNetId(user.getUmNetId())
+                userRepository.existsByEmail(user.getEmail())
         );
         assertTrue(
-                userRepository.findByUmNetId(user.getUmNetId()).isEmpty()
+                userRepository.findByEmail(user.getEmail()).isEmpty()
         );
     }
 
@@ -121,7 +121,7 @@ class UserRepositoryImplTest {
 
         User saved = userRepository.save(user);
 
-        Optional<User> result = userRepository.findByUmNetId(saved.getUmNetId());
+        Optional<User> result = userRepository.findByEmail(saved.getEmail());
 
         assertTrue(result.isPresent());
         assertTrue(result.orElseThrow().isVerified());
@@ -135,8 +135,8 @@ class UserRepositoryImplTest {
         userRepository.save(first);
         userRepository.save(second);
 
-        Optional<User> firstResult = userRepository.findByUmNetId(first.getUmNetId());
-        Optional<User> secondResult = userRepository.findByUmNetId(second.getUmNetId());
+        Optional<User> firstResult = userRepository.findByEmail(first.getEmail());
+        Optional<User> secondResult = userRepository.findByEmail(second.getEmail());
 
         assertTrue(firstResult.isPresent());
         assertTrue(secondResult.isPresent());
@@ -155,7 +155,7 @@ class UserRepositoryImplTest {
         userRepository.save(original);
 
         User updated = new User(
-                original.getUmNetId(),
+                original.getEmail(),
                 original.getPassword(),
                 "Updated",
                 "Name",
@@ -164,7 +164,7 @@ class UserRepositoryImplTest {
 
         userRepository.save(updated);
 
-        Optional<User> result = userRepository.findByUmNetId(original.getUmNetId());
+        Optional<User> result = userRepository.findByEmail(original.getEmail());
 
         assertTrue(result.isPresent());
 
