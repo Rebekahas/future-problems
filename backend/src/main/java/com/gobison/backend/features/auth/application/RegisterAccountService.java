@@ -48,14 +48,12 @@ public class RegisterAccountService {
             throw new RegisterAccountException(INVALID_REQUEST);
         }
 
+        Instant createdAt = Instant.now();
         User user = new User(normalizedEmail, passwordEncoder.encode(password), firstName.trim(), lastName.trim(),
                 false);
         User savedUser;
-        // After validation, before saving:
-        Instant createdAt = null;
         try {
             savedUser = userRepository.save(user);
-            createdAt = Instant.now();
         } catch (DataIntegrityViolationException exception) {
             // A concurrent registration can pass the existence checks; the database uniqueness constraint wins.
             if (userRepository.existsByEmail(normalizedEmail)) {
