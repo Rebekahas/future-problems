@@ -24,12 +24,12 @@ public class SessionAuthenticationService {
     }
 
     // Call only after validating credentials or successfully creating the account.
-    public void establishSession(String umNetId, HttpServletRequest request, HttpServletResponse response) {
-        if (umNetId == null || umNetId.isBlank()) {
-            throw new IllegalArgumentException("A UMNetID is required to establish a session.");
+    public void establishSession(String email, HttpServletRequest request, HttpServletResponse response) {
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("A Email is required to establish a session.");
         }
         UsernamePasswordAuthenticationToken authentication =
-                UsernamePasswordAuthenticationToken.authenticated(umNetId, null, List.of());
+                UsernamePasswordAuthenticationToken.authenticated(email, null, List.of());
         sessionStrategy.onAuthentication(authentication, request, response);
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(authentication);
