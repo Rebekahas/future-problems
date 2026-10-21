@@ -1,4 +1,3 @@
-
 package com.gobison.backend.features.user.infrastructure.persistence;
 
 import com.gobison.backend.features.user.domain.model.User;
@@ -33,7 +32,7 @@ public class UserRepositoryImpl implements UserRepository {
                 user.getLastName(),
                 user.isVerified()
         );
-                
+        entity.setVerificationCode(user.getVerificationCode());
 
         UserEntity saved = jpaRepository.save(entity);
 
@@ -51,12 +50,14 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     private User toDomain(UserEntity entity) {
-        return new User(
+        User user = new User(
                 entity.getUmNetId(),
                 entity.getPassword(),
                 entity.getFirstName(),
                 entity.getLastName(),
                 entity.isVerified()
         );
+        user.setVerificationCode(entity.getVerificationCode());
+        return user;
     }
 }

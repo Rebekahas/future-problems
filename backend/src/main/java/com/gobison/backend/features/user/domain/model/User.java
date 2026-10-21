@@ -6,6 +6,7 @@ public class User {
     private String firstName;
     private String lastName;
     private boolean verified;
+    private String verificationCode;
     private String password;
 
     public User(String umNetId, String password, String firstName,
@@ -35,6 +36,14 @@ public class User {
 
     public boolean isVerified() {
         return verified;
+    }
+
+    public String getVerificationCode() {
+        return verificationCode;
+    }
+
+    public void setVerificationCode(String verificationCode) {
+        this.verificationCode = verificationCode;
     }
 
     public void setFirstName(String firstName) {

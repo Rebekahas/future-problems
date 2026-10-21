@@ -27,6 +27,9 @@ public class UserEntity {
     @Column(name = "verified", nullable = false)
     private boolean verified;
 
+    @Column(name = "verification_code", length = 6)
+    private String verificationCode;
+
     // Required by JPA
     protected UserEntity() {
     }
@@ -62,6 +65,14 @@ public class UserEntity {
 
     public boolean isVerified() {
         return verified;
+    }
+
+    public String getVerificationCode() {
+        return verificationCode;
+    }
+
+    public void setVerificationCode(String verificationCode) {
+        this.verificationCode = verificationCode;
     }
 
     public void setFirstName(String firstName) {
