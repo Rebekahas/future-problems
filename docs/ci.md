@@ -37,3 +37,34 @@ For a successful run, download the `flutter-coverage` artifact and extract the Z
 
 Coverage shows which recorded lines were executed by tests.
 It does not prove that the code is correct or that every scenario has been tested.
+
+## Backend CI
+
+The workflow is defined in [backend-ci.yml](../.github/workflows/backend-ci.yml).
+
+It builds and tests the Java backend in `backend/`.
+It runs on pushes and when pull requests are opened, reopened, or updated.
+
+### Test environment
+
+The workflow runs on `ubuntu-latest` and uses Temurin Java `21`.
+
+It starts a temporary PostgreSQL `17` database for testing.
+The backend connects to this database using environment variables.
+
+Hibernate uses `create-drop` to create tables when the application starts and drop them when it shuts down.
+
+### Checks
+
+1. Build and test the backend with `bash ./mvnw --batch-mode verify`.
+2. Upload test reports from `backend/target/surefire-reports/`, even if tests fail.
+
+### Viewing results
+
+Open the repository's Actions tab and select a Backend CI run.
+Select the `backend-check` job to view the logs for each step.
+
+Download the `backend-test-reports` artifact and extract the ZIP file.
+Open the `.txt` report to see the test count, failures, errors, and skipped tests.
+
+If the build fails before reports are generated, check the workflow logs.
