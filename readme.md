@@ -12,3 +12,4 @@
 
 
 [Working Agreement](docs/WorkingAgreement.md)
+[Frontend Documentation](docs/frontend.md)
