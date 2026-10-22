@@ -66,9 +66,10 @@ flutter test test/path/to/your_test.dart
 The frontend is organized into separate components to keep UI code, application logic, and API communication manageable.
 
 - **Pages:** Application screens and user interface.
-- **Controllers:** Manage application state, validation-related workflows, loading states, and error handling.
+- **Controllers:** Manage application state, coordinate workflows, and handle loading states and errors.
 - **Services:** Handle communication with the backend API.
 - **Models:** Represent application data received from or sent to the backend.
+- **Validators:** Validate user input against predefined rules.
 - **Core:** Contains shared configuration, theme definitions, colors, and reusable widgets.
 - **Tests:** Contain automated Flutter tests.
 
