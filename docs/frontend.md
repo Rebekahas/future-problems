@@ -32,7 +32,7 @@
    flutter run -d chrome
    ```
 
-  Note: Currently, the frontend has been tested to run on web properly on web only
+  Note: Currently, the frontend has been tested to run properly on web only
 
 ## Configuration
 
@@ -60,6 +60,18 @@ To run a specific test file:
 ```bash
 flutter test test/path/to/your_test.dart
 ```
+
+## Project Structure
+
+The frontend is organized into separate components to keep UI code, application logic, and API communication manageable.
+
+- **Pages:** Application screens and user interface.
+- **Controllers:** Manage application state, validation-related workflows, loading states, and error handling.
+- **Services:** Handle communication with the backend API.
+- **Models:** Represent application data received from or sent to the backend.
+- **Core:** Contains shared configuration, theme definitions, colors, and reusable widgets.
+- **Tests:** Contain automated Flutter tests.
+
 
 ## Core Features
 
@@ -110,15 +122,3 @@ Handles displaying and editing the authenticated user's profile information.
 - Provides a centralized application theme and color configuration.
 - Uses reusable UI components, including the GoBison logo.
 - Provides login, registration, and profile-related screens.
-
-## Project Structure
-
-The frontend is organized into separate components to keep UI code, application logic, and API communication manageable.
-
-- **Pages:** Application screens and user interface.
-- **Controllers:** Manage application state, validation-related workflows, loading states, and error handling.
-- **Services:** Handle communication with the backend API.
-- **Models:** Represent application data received from or sent to the backend.
-- **Core:** Contains shared configuration, theme definitions, colors, and reusable widgets.
-- **Tests:** Contain automated Flutter tests.
-
