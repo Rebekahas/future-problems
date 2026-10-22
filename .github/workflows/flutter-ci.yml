@@ -1,0 +1,45 @@
+name: Flutter CI
+
+on:
+    push:
+    pull_request:
+
+jobs:
+    flutter-check:
+        runs-on: ubuntu-latest
+
+        steps:
+          - name: Download project code
+            uses: actions/checkout@v6
+
+          - name: Set up Flutter
+            uses: subosito/flutter-action@v2
+            with:
+                flutter-version: '3.47.7'
+                channel: stable
+        
+          - name: Install dependencies
+            working-directory: gobison
+            run: flutter pub get
+          
+          - name: Analyze code
+            working-directory: gobison
+            run: flutter analyze  --no-fatal-infos
+        
+          - name: Run tests
+            working-directory: gobison
+            run: flutter test --coverage
+
+          - name: Generate HTML coverage report
+            working-directory: gobison
+            run: |
+              sudo apt-get update
+              sudo apt-get install -y lcov
+              genhtml coverage/lcov.info --output-directory coverage/html
+        
+          - name: Upload coverage report
+            uses: actions/upload-artifact@v7
+            with:
+                name: flutter-coverage
+                path: gobison/coverage/
+                if-no-files-found: error
