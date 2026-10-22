@@ -1,0 +1,79 @@
+name: Backend Deploy
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  backend-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      SUPABASE_DB_URL: jdbc:postgresql://localhost:5432/gobison_test
+      SUPABASE_DB_USERNAME: ci_user
+      SUPABASE_DB_PASSWORD: ci_password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: gobison_test
+          POSTGRES_USER: ci_user
+          POSTGRES_PASSWORD: ci_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci_user -d gobison_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Download project code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Build and test backend
+        working-directory: backend
+        run: bash ./mvnw --batch-mode verify
+
+      - name: Upload backend test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-reports
+          path: backend/target/surefire-reports/
+          if-no-files-found: warn
+
+      - name: Upload compiled jar artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jar
+          path: backend/target/*.jar
+          if-no-files-found: error
+
+      - name: Deploy Backend to Webserver via Rsync
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          echo "$SSH_KEY" > private_key
+          chmod 600 private_key
+          
+          # Create remote directory structure
+          ssh -p2525 -i private_key -o StrictHostKeyChecking=no deploybot@popicraft.net "mkdir -p /home/deploybot/gobison-backend"
+          
+          # Sync the jar file
+          rsync -avz -e "ssh -p2525 -i private_key -o StrictHostKeyChecking=no" backend/target/backend-0.0.1-SNAPSHOT.jar deploybot@popicraft.net:/home/deploybot/gobison-backend/backend.jar
+          
+          # Restart the backend service via systemd
+          ssh -p2525 -i private_key -o StrictHostKeyChecking=no deploybot@popicraft.net "systemctl --user restart gobison-backend"
