@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../core/models/user.dart';
 import '../../../core/models/user_profile.dart';
 import '../../../core/widgets/user_avatar.dart';
-import '../../../core/theme/app_colors.dart';
 
 class DisplayProfilePage extends StatelessWidget {
   const DisplayProfilePage({

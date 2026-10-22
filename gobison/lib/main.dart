@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'features/auth/presentation/register_page.dart';
 import 'features/auth/presentation/login_page.dart';
-import 'features/auth/presentation/session_gate.dart';
 
 void main() {
   runApp(const GoBisonApp());

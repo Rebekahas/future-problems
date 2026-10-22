@@ -54,7 +54,7 @@ class _RegisterPageState extends State<RegisterPage> {
     await _authController.register(
       firstName: _firstNameController.text.trim(),
       lastName: _lastNameController.text.trim(),
-      email: _emailController.text.trim() + '@myumanitoba.ca',
+      email: '${_emailController.text.trim()}@myumanitoba.ca',
       password: _passwordController.text,
     );
 

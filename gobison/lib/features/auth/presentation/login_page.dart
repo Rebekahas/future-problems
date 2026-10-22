@@ -47,7 +47,7 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     await _authController.login(
-      email: _emailController.text.trim() + '@myumanitoba.ca',
+      email: '${_emailController.text.trim()}@myumanitoba.ca',
       password: _passwordController.text,
     );
 
