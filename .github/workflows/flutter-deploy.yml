@@ -1,4 +1,4 @@
-name: Flutter Deploy Web2
+name: Flutter Deploy Web
 
 on:
   push:
