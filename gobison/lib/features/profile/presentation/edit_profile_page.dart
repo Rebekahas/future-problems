@@ -39,7 +39,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   late final TextEditingController _bioController;
 
   String? _gender;
-  bool _isSaving = false;
+  final bool _isSaving = false;
 
   @override
   void initState() {
@@ -415,66 +415,64 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   Widget _buildBottomActions() {
-    return Container(
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 712),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              OutlinedButton(
-                onPressed: _isSaving ? null : _cancel,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.primary,
-                  side: const BorderSide(color: AppColors.primary),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 22,
-                    vertical: 15,
-                  ),
-                  textStyle: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 712),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            OutlinedButton(
+              onPressed: _isSaving ? null : _cancel,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                side: const BorderSide(color: AppColors.primary),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 22,
+                  vertical: 15,
                 ),
-                child: const Text('Cancel'),
-              ),
-              const SizedBox(width: 12),
-              FilledButton.icon(
-                onPressed: _saveProfile,
-                icon: _profileController.isLoading
-                    ? const SizedBox(
-                        height: 16,
-                        width: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : null,
-                label: Text(
-                  _profileController.isLoading ? 'Saving...' : 'Save Changes',
+                textStyle: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
                 ),
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 22,
-                    vertical: 15,
-                  ),
-                  textStyle: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
-            ],
-          ),
+              child: const Text('Cancel'),
+            ),
+            const SizedBox(width: 12),
+            FilledButton.icon(
+              onPressed: _saveProfile,
+              icon: _profileController.isLoading
+                  ? const SizedBox(
+                      height: 16,
+                      width: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : null,
+              label: Text(
+                _profileController.isLoading ? 'Saving...' : 'Save Changes',
+              ),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 22,
+                  vertical: 15,
+                ),
+                textStyle: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

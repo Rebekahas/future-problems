@@ -16,9 +16,9 @@ String? _validateEmail(String? value) {
     return 'Please enter your UMNetId';
   }
 
-  final UMNetId = value.trim();
+  final umNetId = value.trim();
 
-  if (UMNetId.contains('@')) {
+  if (umNetId.contains('@')) {
     return 'Enter the UMNetId part of your email only, without @ or a domain';
   }
 

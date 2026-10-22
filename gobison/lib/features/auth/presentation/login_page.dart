@@ -47,7 +47,7 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     await _authController.login(
-      email: _emailController.text.trim() + '@myumanitoba.ca',
+      email: '${_emailController.text.trim()}@myumanitoba.ca',
       password: _passwordController.text,
     );
 
@@ -216,28 +216,6 @@ class _LoginPageState extends State<LoginPage> {
                                 _obscurePassword = !_obscurePassword;
                               });
                             },
-                          ),
-                        ),
-
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: () {
-                              // TODO: Implement forgot password.
-                            },
-                            style: TextButton.styleFrom(
-                              foregroundColor: AppColors.primary,
-                              padding: const EdgeInsets.all(5),
-                              minimumSize: Size.zero,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            child: const Text(
-                              'Forgot password?',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
-                            ),
                           ),
                         ),
 
