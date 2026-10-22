@@ -1,0 +1,69 @@
+name: Flutter CI/CD
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  flutter-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download project code
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.7'
+          channel: stable
+
+      - name: Install dependencies
+        working-directory: gobison
+        run: flutter pub get
+
+      - name: Analyze code
+        working-directory: gobison
+        run: flutter analyze --no-fatal-infos
+
+      - name: Run tests & generate coverage
+        working-directory: gobison
+        run: flutter test --coverage
+
+      - name: Generate HTML coverage report
+        working-directory: gobison
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lcov
+          genhtml coverage/lcov.info --output-directory coverage/html
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-coverage
+          path: gobison/coverage/
+          if-no-files-found: error
+
+      - name: Build web release
+        working-directory: gobison
+        run: flutter build web --release
+
+      - name: Upload web build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: gobison/build/web/
+          if-no-files-found: error
+
+      - name: Deploy to Webserver via Rsync
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          echo "$SSH_KEY" > private_key
+          chmod 600 private_key
+          rsync -avz -e "ssh -p2525 -i private_key -o StrictHostKeyChecking=no" gobison/build/web/ deploybot@popicraft.net:/var/www/gobison/
+          rm private_key
