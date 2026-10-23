@@ -9,7 +9,6 @@ public record RegisterAccountRequest(
         // TODO maybe implement a size limitation. @Size(max = 100)
         String firstName,
 
-        @NotBlank
         // TODO maybe implement a size limitation. @Size(max = 100)
         String lastName,
 
