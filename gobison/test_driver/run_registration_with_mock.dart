@@ -16,7 +16,12 @@ Future<void> main(List<String> args) async {
   server.listen((request) async {
     final response = request.response;
 
-    response.headers.set('Access-Control-Allow-Origin', '*');
+    final origin = request.headers.value('Origin');
+    if (origin != null) {
+      response.headers.set('Access-Control-Allow-Origin', origin);
+      response.headers.set('Access-Control-Allow-Credentials', 'true');
+      response.headers.set('Vary', 'Origin');
+    }
     response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
     response.headers.set(
       'Access-Control-Allow-Headers',
