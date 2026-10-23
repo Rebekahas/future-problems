@@ -40,7 +40,7 @@ class RegisterAccountServiceTest {
     @Test
     void registersNormalizedAccountWithHashedPasswordAndTimestamp() {
         when(passwordEncoder.encode("password")).thenReturn("hashed-password");
-        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(userRepository.create(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
         Instant beforeRegistration = Instant.now();
 
         RegisteredAccount result = service.registerAccount(
@@ -56,14 +56,25 @@ class RegisterAccountServiceTest {
                 () -> assertFalse(result.createdAt().isBefore(beforeRegistration)),
                 () -> assertFalse(result.createdAt().isAfter(afterRegistration))
         );
-        verify(userRepository).save(argThat(user ->
+        verify(userRepository).create(argThat(user ->
                 user.getEmail().equals("ada@example.com")
                         && user.getPassword().equals("hashed-password")
                         && user.getFirstName().equals("Ada")
                         && user.getLastName().equals("Lovelace")
                         && !user.isVerified()));
         verify(sessionAuthenticationService).establishSession("ada@example.com", request, response);
+        verify(userRepository).existsByEmail("ada@example.com");
         verifyNoMoreInteractions(userRepository, passwordEncoder, sessionAuthenticationService);
+    }
+
+    @Test
+    void rejectsExistingEmailWithoutUpdatingCredentials() {
+        when(userRepository.existsByEmail("ada@example.com")).thenReturn(true);
+        var exception = assertThrows(RegisterAccountException.class, () -> register("ada@example.com"));
+        assertEquals(EMAIL_ALREADY_REGISTERED, exception.getReason());
+        verify(userRepository, never()).create(any());
+        verify(userRepository, never()).save(any());
+        verifyNoInteractions(passwordEncoder, sessionAuthenticationService);
     }
 
     @Test
@@ -86,14 +97,14 @@ class RegisterAccountServiceTest {
     @Test
     void mapsConcurrentDuplicateEmailConstraintViolationToConflictReason() {
         when(passwordEncoder.encode("password")).thenReturn("hashed-password");
-        when(userRepository.save(any(User.class))).thenThrow(new DataIntegrityViolationException("duplicate"));
-        when(userRepository.existsByEmail("ada@example.com")).thenReturn(true);
+        when(userRepository.create(any(User.class))).thenThrow(new DataIntegrityViolationException("duplicate"));
+        when(userRepository.existsByEmail("ada@example.com")).thenReturn(false, true);
 
         RegisterAccountException exception = assertThrows(RegisterAccountException.class,
                 () -> register("ada@example.com"));
 
         assertEquals(EMAIL_ALREADY_REGISTERED, exception.getReason());
-        verify(userRepository).existsByEmail("ada@example.com");
+        verify(userRepository, times(2)).existsByEmail("ada@example.com");
         verifyNoInteractions(sessionAuthenticationService);
     }
 
@@ -101,7 +112,7 @@ class RegisterAccountServiceTest {
     void rethrowsUnrelatedPersistenceConstraintViolation() {
         DataIntegrityViolationException persistenceFailure = new DataIntegrityViolationException("constraint");
         when(passwordEncoder.encode("password")).thenReturn("hashed-password");
-        when(userRepository.save(any(User.class))).thenThrow(persistenceFailure);
+        when(userRepository.create(any(User.class))).thenThrow(persistenceFailure);
         when(userRepository.existsByEmail("ada@example.com")).thenReturn(false);
 
         DataIntegrityViolationException thrown = assertThrows(DataIntegrityViolationException.class,

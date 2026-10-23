@@ -2,6 +2,8 @@ package com.gobison.backend.features.user.infrastructure.persistence;
 
 import com.gobison.backend.features.user.domain.model.User;
 import com.gobison.backend.features.user.domain.repository.UserRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +13,19 @@ import java.util.Optional;
 //implements the domain interface by calling the JPA repository and converting between User and UserEntity
 @Repository
 public class UserRepositoryImpl implements UserRepository {
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @Override
+    @Transactional
+    public User create(User user) {
+        UserEntity entity = new UserEntity(user.getEmail(), user.getPassword(),
+                user.getFirstName(), user.getLastName(), user.isVerified());
+        entityManager.persist(entity);
+        entityManager.flush();
+        return toDomain(entity);
+    }
 
     private final UserJpaRepository jpaRepository;
 
