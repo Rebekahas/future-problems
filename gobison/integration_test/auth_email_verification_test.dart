@@ -39,7 +39,6 @@ void main() {
         home: VerificationPage(
           email: 'integrationtest@myumanitoba.ca',
           user: user,
-          authToken: 'integration-test-token',
           userProfile: profile,
         ),
       ),
@@ -115,7 +114,6 @@ void main() {
         home: VerificationPage(
           email: 'integrationtest@myumanitoba.ca',
           user: user,
-          authToken: 'integration-test-token',
           userProfile: profile,
         ),
       ),

@@ -32,7 +32,6 @@ void main() {
         home: VerificationPage(
           email: 'rebekah123@myumanitoba.ca',
           user: testUser,
-          authToken: 'token_abc',
           userProfile: testUserProfile,
         ),
       );

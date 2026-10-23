@@ -46,13 +46,16 @@ public class RegisterAccountService {
         if (!EMAIL_FORMAT.matcher(normalizedEmail).matches()) {
             throw new RegisterAccountException(INVALID_REQUEST);
         }
+        if (userRepository.existsByEmail(normalizedEmail)) {
+            throw new RegisterAccountException(EMAIL_ALREADY_REGISTERED);
+        }
         // TODO consider storing when accounts were created for record keeping purposes
         Instant createdAt = Instant.now();
-        User user = new User(normalizedEmail, passwordEncoder.encode(password), firstName.trim(), lastName.trim(),
+        User user = new User(normalizedEmail, passwordEncoder.encode(password), firstName.trim(), lastName == null ? "" : lastName.trim(),
                 false);
         User savedUser;
         try {
-            savedUser = userRepository.save(user);
+            savedUser = userRepository.create(user);
         } catch (DataIntegrityViolationException exception) {
             // A concurrent registration can pass the existence checks; the database uniqueness constraint wins.
             if (userRepository.existsByEmail(normalizedEmail)) {

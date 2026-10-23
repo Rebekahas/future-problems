@@ -29,6 +29,7 @@ class RegisterAccountControllerTest {
 
     @Autowired private MockMvc mvc;
     @MockitoBean private RegisterAccountService service;
+    @MockitoBean private com.gobison.backend.features.auth.application.EmailVerificationService verification;
 
     @Test
     void returnsCreatedAccountAndTimestamp() throws Exception {
@@ -44,7 +45,7 @@ class RegisterAccountControllerTest {
                                  "email":"ada@example.com","password":"password"}
                                 """))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.userId").value("ada@example.com"))
+                .andExpect(jsonPath("$.id").value("ada@example.com"))
                 .andExpect(jsonPath("$.firstName").value("Ada"))
                 .andExpect(jsonPath("$.lastName").value("Lovelace"))
                 .andExpect(jsonPath("$.email").value("ada@example.com"))
@@ -54,6 +55,23 @@ class RegisterAccountControllerTest {
         verify(service).registerAccount(eq("Ada"), eq("Lovelace"), eq("ada@example.com"), eq("password"),
                 any(), any());
         verifyNoMoreInteractions(service);
+        verify(verification).sendVerificationCode("ada@example.com");
+    }
+
+    @Test
+    void reportsDeliveryFailureAfterAccountWasCreated() throws Exception {
+        when(service.registerAccount(anyString(), anyString(), anyString(), anyString(), any(), any()))
+                .thenReturn(new RegisteredAccount("ada@myumanitoba.ca", "Ada", "Lovelace",
+                        "ada@myumanitoba.ca", Instant.now()));
+        doThrow(new org.springframework.mail.MailSendException("SMTP unavailable"))
+                .when(verification).sendVerificationCode("ada@myumanitoba.ca");
+        mvc.perform(post(ENDPOINT).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"firstName\":\"Ada\",\"lastName\":\"Lovelace\",\"email\":\"ada@myumanitoba.ca\",\"password\":\"password\"}"))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("account is saved")));
+        var order = inOrder(service, verification);
+        order.verify(service).registerAccount(anyString(), anyString(), anyString(), anyString(), any(), any());
+        order.verify(verification).sendVerificationCode("ada@myumanitoba.ca");
     }
 
     @Test

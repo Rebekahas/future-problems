@@ -14,12 +14,11 @@ class VerificationPage extends StatefulWidget {
     super.key,
     required this.email,
     required this.user,
-    required this.authToken,
     required this.userProfile,
   });
   final String email;
   final User user;
-  final String authToken;
+
   final UserProfile userProfile;
 
   @override
@@ -67,7 +66,6 @@ class _VerificationPageState extends State<VerificationPage> {
       return;
     }
     await _authController.emailVerification(
-      token: widget.authToken,
       code: currentCode,
       user: widget.user,
     );

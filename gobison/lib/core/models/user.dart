@@ -17,7 +17,8 @@ class User {
     return User(
       id: json['id'].toString(),
       firstName: json['firstName'] as String,
-      lastName: json['lastName'] as String,
+      lastName: json['lastName'] as String?,
+      verified: json['verified'] as bool? ?? false,
       email: json['email'] as String,
     );
   }

@@ -28,6 +28,7 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
 
     try {
+      registeredUser = null;
       final data = await _authService.register(
         firstName: firstName,
         lastName: lastName,
@@ -37,8 +38,7 @@ class AuthController extends ChangeNotifier {
 
       registeredUser = User.fromJson(data);
       final user = User(
-        id: registeredUser!
-            .id, // Maps 'userId' from JSON to 'id' in your User model
+        id: registeredUser!.id,
         firstName: registeredUser!.firstName,
         lastName: registeredUser!.lastName,
         email: registeredUser!.email,
@@ -65,8 +65,6 @@ class AuthController extends ChangeNotifier {
         email: email,
         password: password,
       );
-      final accessToken =
-          responseData['accessToken'] ?? false; // Extract the user map
       final userMap = responseData['user'];
       // Map the JSON keys explicitly to your User model fields
       final user = User(
@@ -76,9 +74,8 @@ class AuthController extends ChangeNotifier {
         email: userMap['email'],
         verified: userMap['verified'] ?? false,
       );
-      await SessionService.saveAccessToken(accessToken: accessToken);
+
       await SessionService.saveUser(user: user);
-      await SessionService.setVerification(isVerified: user.verified);
     } catch (e) {
       errorMessage = AuthResponseHandler.handleLoginError(extractErrorCode(e));
     } finally {
@@ -87,20 +84,15 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  Future<void> emailVerification({
-    required String token,
-    required String code,
-    User? user,
-  }) async {
+  Future<void> emailVerification({required String code, User? user}) async {
     isLoading = true;
     errorMessage = null;
     notifyListeners();
 
     try {
-      final responseData = await _authService.verifyEmail(
-        token: token,
-        code: code,
-      );
+      print("test1");
+      final responseData = await _authService.verifyEmail(code: code);
+      print(responseData);
       final isVerified = responseData['universityVerified'];
       await SessionService.setVerification(isVerified: isVerified);
     } catch (e) {
@@ -116,6 +108,9 @@ class AuthController extends ChangeNotifier {
 
 int extractErrorCode(Object e) {
   final message = e.toString();
+  if (message.contains('503')) {
+    return 503;
+  }
   if (message.contains('400')) {
     return 400;
   }

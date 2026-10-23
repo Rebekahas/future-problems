@@ -55,26 +55,21 @@ class SessionService {
         profile: _mockProfile!,
       );
     } else {
-      _currentProfile = UserProfile(
-        userId: _currentUser!.id,
-        firstName: _currentUser!.firstName,
-        lastName: _currentUser!.lastName,
-        age: 22,
-        gender: 'Female',
-        description: 'My car is quite messy, but I\'ll get you to campus safe!',
+      final user = _currentUser;
+      if (user == null) return null;
+      _currentProfile ??= UserProfile(
+        userId: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
       );
-      return SessionData(
-        accessToken: 'mock-token',
-        user: _currentUser!,
-        profile: _currentProfile!,
-      );
+      return SessionData(user: user, profile: _currentProfile!);
     }
   }
 
   static String? get accessToken => _accessToken;
 
   static Future<void> saveSession({
-    required String accessToken,
+    String? accessToken,
     required User user,
     required UserProfile profile,
   }) async {
@@ -89,6 +84,7 @@ class SessionService {
 
   static Future<void> saveUser({required User user}) async {
     _currentUser = user;
+    _currentProfile = null;
   }
 
   static Future<void> clearSession() async {

@@ -67,7 +67,6 @@ class _SessionGateState extends State<SessionGate> {
           return VerificationPage(
             email: session.user.email,
             user: session.user,
-            authToken: session.accessToken!,
             userProfile: session.profile,
           );
         }

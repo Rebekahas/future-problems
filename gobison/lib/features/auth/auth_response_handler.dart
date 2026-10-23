@@ -1,6 +1,8 @@
 class AuthResponseHandler {
   static String handleLoginError(int statusCode) {
     switch (statusCode) {
+      case 503:
+        return 'Unable to send verification email. Please log in again to retry.';
       case 400:
         return 'Please enter a valid email and password.';
       case 401:
@@ -16,6 +18,8 @@ class AuthResponseHandler {
 
   static String handleRegistrationError(int statusCode) {
     switch (statusCode) {
+      case 503:
+        return 'Your account was saved, but the verification email failed. Please log in to retry.';
       case 400:
         return 'Please check your information and try again.';
       case 409:
@@ -29,7 +33,7 @@ class AuthResponseHandler {
     }
   }
 
-    static String handleVerificationError(int statusCode) {
+  static String handleVerificationError(int statusCode) {
     switch (statusCode) {
       case 400:
         return 'Verification code is missing or malformed.';

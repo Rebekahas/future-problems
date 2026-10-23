@@ -20,7 +20,7 @@ void main() {
 
             return http.Response(
               jsonEncode({
-                'userId': '123',
+                'id': '123',
                 'firstName': 'Rebekah',
                 'lastName': 'Soneye',
                 'email': 'rebekah123@myumanitoba.ca',
@@ -53,7 +53,7 @@ void main() {
             'password': 'password123',
           });
 
-          expect(result['userId'], '123');
+          expect(result['id'], '123');
           expect(result['firstName'], 'Rebekah');
           expect(result['email'], 'rebekah123@myumanitoba.ca');
         },
@@ -174,18 +174,12 @@ void main() {
         final client = MockClient((request) async {
           capturedRequest = request;
 
-          return http.Response(
-            '{"success": true, "message": "Email verified"}',
-            200,
-          );
+          return http.Response('{"universityVerified": true}', 200);
         });
 
         final service = AuthService(client: client);
 
-        final result = await service.verifyEmail(
-          token: 'sample_token_abc',
-          code: '654321',
-        );
+        final result = await service.verifyEmail(code: '654321');
 
         expect(capturedRequest.method, 'POST');
         expect(
@@ -194,15 +188,11 @@ void main() {
         );
         expect(capturedRequest.headers['Content-Type'], 'application/json');
         expect(capturedRequest.headers['Accept'], 'application/json');
-        expect(
-          capturedRequest.headers['Authorization'],
-          'Bearer sample_token_abc',
-        );
+        expect(capturedRequest.headers['Authorization'], isNull);
 
         expect(jsonDecode(capturedRequest.body), {'code': '654321'});
 
-        expect(result['success'], true);
-        expect(result['message'], 'Email verified');
+        expect(result['universityVerified'], true);
       });
 
       test('throws exception when verification fails with a non-200/201 status code', () async {
@@ -213,7 +203,7 @@ void main() {
         final service = AuthService(client: client);
 
         expect(
-          () => service.verifyEmail(token: 'sample_token_abc', code: '000000'),
+          () => service.verifyEmail(code: '000000'),
           throwsA(
             isA<Exception>().having(
               (e) => e.toString(),
