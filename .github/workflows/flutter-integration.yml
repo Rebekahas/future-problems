@@ -1,0 +1,82 @@
+name: Flutter Integration Tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  integration-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      CI: 'true'
+
+    defaults:
+      run:
+        working-directory: gobison
+
+    steps:
+      - name: Download project code
+        uses: actions/checkout@v6
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.7'
+          channel: stable
+
+      - name: Set up Chrome and ChromeDriver
+        id: chrome
+        uses: browser-actions/setup-chrome@v2
+        with:
+          chrome-version: stable
+          install-chromedriver: true
+          install-dependencies: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Start ChromeDriver
+        env:
+          DRIVER_PATH: ${{ steps.chrome.outputs.chromedriver-path }}
+        run: |
+          nohup "$DRIVER_PATH" --port=4444 > "$RUNNER_TEMP/chromedriver.log" 2>&1 &
+
+          for attempt in {1..30}; do
+            if curl --silent --fail http://localhost:4444/status; then
+              exit 0
+            fi
+            sleep 1
+          done
+
+          cat "$RUNNER_TEMP/chromedriver.log"
+          exit 1
+
+      - name: Test registration page and validation
+        env:
+          CHROME_EXECUTABLE: ${{ steps.chrome.outputs.chrome-path }}
+        run: |
+          flutter drive \
+            --driver=test_driver/integration_test.dart \
+            --target=integration_test/auth_registration_test.dart \
+            -d web-server \
+            --browser-name=chrome \
+            --driver-port=4444 \
+            --chrome-binary="$CHROME_EXECUTABLE" \
+            --headless
+
+      - name: Test registration responses with mock backend
+        env:
+          CHROME_EXECUTABLE: ${{ steps.chrome.outputs.chrome-path }}
+        run: dart run test_driver/run_registration_with_mock.dart
+
+      - name: Show ChromeDriver log
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/chromedriver.log" ]; then
+            cat "$RUNNER_TEMP/chromedriver.log"
+          fi

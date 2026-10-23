@@ -61,7 +61,9 @@ Future<void> main(List<String> args) async {
         'web-server',
         '--browser-name=chrome',
         '--driver-port=4444',
-        '--no-headless',
+        if (Platform.environment.containsKey('CHROME_EXECUTABLE'))
+          "--chrome-binary=${Platform.environment['CHROME_EXECUTABLE']}",
+        Platform.environment['CI'] == 'true' ? '--headless' : '--no-headless',
       ],
       runInShell: Platform.isWindows,
       mode: ProcessStartMode.inheritStdio,
