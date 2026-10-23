@@ -88,6 +88,7 @@ Future<void> main(List<String> args) async {
       'flutter',
       [
         'drive',
+        '--dart-define=API_BASE_URL=http://localhost:8080',
         '--driver=test_driver/integration_test.dart',
         '--target=$target',
         '-d',
