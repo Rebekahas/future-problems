@@ -4,12 +4,14 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import '../../../core/network/api_config.dart';
+import '../../core/network/auth_client.dart';
+
+import '../../core/network/api_config.dart';
 
 class AuthService {
   final http.Client _client;
 
-  AuthService({http.Client? client}) : _client = client ?? http.Client();
+  AuthService({http.Client? client}) : _client = client ?? createAuthClient();
 
   Future<Map<String, dynamic>> register({
     required String firstName,
@@ -67,10 +69,7 @@ class AuthService {
     );
   }
 
-  Future<Map<String, dynamic>> verifyEmail({
-    required String token,
-    required String code,
-  }) async {
+  Future<Map<String, dynamic>> verifyEmail({required String code}) async {
     final uri = Uri.parse('${ApiConfig.baseUrl}/api/v1/auth/verify-email');
 
     final response = await _client.post(
@@ -78,7 +77,6 @@ class AuthService {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'Authorization': 'Bearer $token',
       },
       body: jsonEncode({'code': code}),
     );

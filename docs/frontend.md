@@ -19,7 +19,7 @@
 
 3. Navigate to the frontend project directory:
    ```bash
-   cd gobision
+   cd gobison
    ```
 4. Install the project dependencies:
    ```bash
@@ -29,10 +29,18 @@
 
 6. Run the application:
    ```bash
-   flutter run -d chrome
+   flutter run -d chrome --web-port=3000 --dart-define=API_BASE_URL=http://localhost:8080
    ```
 
   Note: Currently, the frontend has been tested to run properly on web only
+
+For local development, run the backend on port 8080 and keep Flutter on port
+3000 as shown above; the backend allows this browser origin. Authentication uses
+an HTTP-only session cookie, not a bearer token. Configure the backend database
+and SMTP credentials before registering. If verification email delivery fails,
+the account remains saved; log in to retry sending a code. Unverified users go
+to verification, and verified users go to the home screen. Refreshing the page
+requires logging in again because frontend session restoration is not implemented.
 
 ## Configuration
 

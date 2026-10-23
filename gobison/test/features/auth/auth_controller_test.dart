@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
 import 'package:gobison/core/models/user.dart';
+import 'package:gobison/core/services/session_service.dart';
 import 'package:gobison/features/auth/auth_controller.dart';
 import 'package:gobison/features/auth/auth_service.dart';
 
@@ -39,10 +40,7 @@ class FakeAuthService extends AuthService {
   }
 
   @override
-  Future<Map<String, dynamic>> verifyEmail({
-    required String token,
-    required String code,
-  }) {
+  Future<Map<String, dynamic>> verifyEmail({required String code}) {
     return onVerifyEmail!();
   }
 }
@@ -59,11 +57,12 @@ void main() {
 
     tearDown(() {
       controller.dispose();
+      SessionService.clearSession();
     });
 
     test('register stores the user after success', () async {
       authService.onRegister = () async => {
-        'userId': '123',
+        'id': '123',
         'firstName': 'Rebekah',
         'lastName': 'Soneye',
         'email': 'rebekah123@myumanitoba.ca',
@@ -78,6 +77,7 @@ void main() {
       );
 
       expect(controller.registeredUser, isA<User>());
+      expect(controller.registeredUser!.id, '123');
       expect(controller.errorMessage, isNull);
       expect(controller.isLoading, isFalse);
     });
@@ -97,6 +97,29 @@ void main() {
       expect(controller.errorMessage, isNotEmpty);
       expect(controller.isLoading, isFalse);
     });
+
+    test(
+      'login succeeds without an access token and preserves verified status',
+      () async {
+        authService.onLogin = () async => {
+          'user': {
+            'userId': '123',
+            'firstName': 'Ada',
+            'lastName': null,
+            'email': 'ada@myumanitoba.ca',
+            'verified': true,
+          },
+        };
+        await controller.login(
+          email: 'ada@myumanitoba.ca',
+          password: 'password',
+        );
+        expect(controller.errorMessage, isNull);
+        final session = await SessionService().loadCurrentSession();
+        expect(session!.user.id, '123');
+        expect(session.user.verified, isTrue);
+      },
+    );
 
     test('login displays an error when login fails', () async {
       authService.onLogin = () async {
@@ -127,7 +150,7 @@ void main() {
       expect(controller.isLoading, isTrue);
 
       completer.complete({
-        'userId': '123',
+        'id': '123',
         'firstName': 'Rebekah',
         'lastName': 'Soneye',
         'email': 'rebekah123@myumanitoba.ca',
@@ -146,7 +169,7 @@ void main() {
       });
 
       authService.onRegister = () async => {
-        'userId': '123',
+        'id': '123',
         'firstName': 'Rebekah',
         'lastName': 'Soneye',
         'email': 'rebekah123@myumanitoba.ca',
@@ -169,10 +192,7 @@ void main() {
         );
       };
 
-      await controller.emailVerification(
-        token: 'sample_token_123',
-        code: '000000',
-      );
+      await controller.emailVerification(code: '000000');
 
       expect(controller.errorMessage, isNotNull);
       expect(controller.errorMessage, isNotEmpty);
@@ -184,18 +204,24 @@ void main() {
 
       authService.onVerifyEmail = () => completer.future;
 
-      final future = controller.emailVerification(
-        token: 'sample_token_123',
-        code: '123456',
-      );
+      final future = controller.emailVerification(code: '123456');
 
       expect(controller.isLoading, isTrue);
 
-      completer.complete({'success': true, 'message': 'Verified'});
+      await SessionService.saveUser(
+        user: const User(
+          id: '123',
+          firstName: 'Ada',
+          email: 'ada@myumanitoba.ca',
+        ),
+      );
+      completer.complete({'universityVerified': true});
 
       await future;
 
       expect(controller.isLoading, isFalse);
+      expect(controller.errorMessage, isNull);
+      expect((await SessionService().loadCurrentSession())!.user.verified, isTrue);
     });
   });
 
@@ -205,6 +231,7 @@ void main() {
       expect(extractErrorCode(Exception('Request failed (409)')), 409);
       expect(extractErrorCode(Exception('Request failed (429)')), 429);
       expect(extractErrorCode(Exception('Request failed (500)')), 500);
+      expect(extractErrorCode(Exception('Request failed (503)')), 503);
     });
 
     test('returns -1 for an unsupported status code', () {

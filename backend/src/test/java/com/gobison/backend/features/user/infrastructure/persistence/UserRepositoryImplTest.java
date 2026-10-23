@@ -39,6 +39,36 @@ class UserRepositoryImplTest {
     }
 
     @Test
+    void concurrentCreatesCannotOverwriteAnAccount() throws Exception {
+        User first = createTestUser("First", "Student", false);
+        User second = new User(first.getEmail(), "different-password", "Second", "Student", false);
+        var start = new java.util.concurrent.CountDownLatch(1);
+        try (var executor = java.util.concurrent.Executors.newFixedThreadPool(2)) {
+            var tasks = new ArrayList<java.util.concurrent.Future<Boolean>>();
+            for (User candidate : List.of(first, second)) {
+                tasks.add(executor.submit(() -> {
+                    start.await();
+                    try {
+                        userRepository.create(candidate);
+                        return true;
+                    } catch (org.springframework.dao.DataIntegrityViolationException duplicate) {
+                        return false;
+                    }
+                }));
+            }
+            start.countDown();
+            int successes = 0;
+            for (var task : tasks) {
+                if (task.get(15, java.util.concurrent.TimeUnit.SECONDS)) successes++;
+            }
+            assertEquals(1, successes);
+        }
+        var saved = userRepository.findByEmail(first.getEmail()).orElseThrow();
+        assertEquals(saved.getFirstName().equals("First") ? first.getPassword() : second.getPassword(),
+                saved.getPassword());
+    }
+
+    @Test
     void shouldSaveUserAndReturnAllFields() {
         User user = createTestUser("Test", "Student", false);
 
