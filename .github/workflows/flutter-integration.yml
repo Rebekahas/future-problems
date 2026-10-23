@@ -74,6 +74,11 @@ jobs:
           CHROME_EXECUTABLE: ${{ steps.chrome.outputs.chrome-path }}
         run: dart run test_driver/run_registration_with_mock.dart
 
+      - name: Test email verification with mock backend
+        env:
+          CHROME_EXECUTABLE: ${{ steps.chrome.outputs.chrome-path }}
+        run: dart run test_driver/run_registration_with_mock.dart integration_test/auth_email_verification_test.dart
+
       - name: Show ChromeDriver log
         if: always()
         run: |

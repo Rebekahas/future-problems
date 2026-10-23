@@ -6,7 +6,7 @@ Future<void> main(List<String> args) async {
       ? 'integration_test/auth_registration_response_test.dart'
       : args.first;
 
-  final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 3000);
+  final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 8080);
 
   final responseCodes = <String, int>{
     'duplicate@myumanitoba.ca': 409,
@@ -18,7 +18,10 @@ Future<void> main(List<String> args) async {
 
     response.headers.set('Access-Control-Allow-Origin', '*');
     response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+    response.headers.set(
+      'Access-Control-Allow-Headers',
+      'Content-Type, Authorization',
+    );
     response.headers.contentType = ContentType.json;
 
     if (request.method == 'OPTIONS') {
@@ -40,6 +43,36 @@ Future<void> main(List<String> args) async {
         response.statusCode = HttpStatus.badRequest;
         response.write(jsonEncode({'message': 'Invalid request'}));
       }
+    } else if (request.method == 'POST' &&
+        request.uri.path == '/api/v1/auth/verify-email') {
+      try {
+        final body = await utf8.decoder.bind(request).join();
+        final data = jsonDecode(body) as Map<String, dynamic>;
+        final code = data['code'];
+
+        if (request.headers.value('Authorization') !=
+            'Bearer integration-test-token') {
+          response.statusCode = HttpStatus.unauthorized;
+          response.write(jsonEncode({'message': 'Invalid authentication'}));
+        } else if (code is! String || !RegExp(r'^[0-9]{6}$').hasMatch(code)) {
+          response.statusCode = HttpStatus.badRequest;
+          response.write(jsonEncode({'message': 'Invalid code format'}));
+        } else if (code == '123456') {
+          response.statusCode = HttpStatus.ok;
+          response.write(jsonEncode({'universityVerified': true}));
+        } else if (code == '900000') {
+          response.statusCode = HttpStatus.internalServerError;
+          response.write(jsonEncode({'message': 'Mock server error'}));
+        } else {
+          response.statusCode = HttpStatus.unprocessableEntity;
+          response.write(
+            jsonEncode({'message': 'Incorrect verification code'}),
+          );
+        }
+      } catch (_) {
+        response.statusCode = HttpStatus.badRequest;
+        response.write(jsonEncode({'message': 'Invalid request'}));
+      }
     } else {
       response.statusCode = HttpStatus.notFound;
       response.write(jsonEncode({'message': 'Unknown endpoint'}));
@@ -48,7 +81,7 @@ Future<void> main(List<String> args) async {
     await response.close();
   });
 
-  stdout.writeln('Mock backend started at http://localhost:3000');
+  stdout.writeln('Mock backend started at http://localhost:8080');
 
   try {
     final process = await Process.start(
