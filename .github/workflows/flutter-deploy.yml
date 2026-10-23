@@ -23,11 +23,9 @@ jobs:
         working-directory: gobison
         run: flutter pub get
 
-
-# TODO fix this later
-#      - name: Analyze code
-#        working-directory: gobison
-#        run: flutter analyze --no-fatal-infos
+      - name: Analyze code
+        working-directory: gobison
+        run: flutter analyze --no-fatal-infos
 
       - name: Run tests & generate coverage
         working-directory: gobison
