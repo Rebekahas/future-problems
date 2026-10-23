@@ -43,4 +43,83 @@ void main() {
       ]),
     );
   });
+
+  testWidgets('Registration rejects a full email address', (tester) async {
+    app.main();
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Enter your first name'),
+      'Test',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Enter your UMNetID'),
+      'integrationtest@myumanitoba.ca',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Please enter a password'),
+      'TestPass123',
+    );
+
+    final createAccountButton = find.widgetWithText(
+      ElevatedButton,
+      'Create Account',
+    );
+
+    await tester.ensureVisible(createAccountButton);
+    await tester.pumpAndSettle();
+    await tester.tap(createAccountButton);
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        'Enter the UMNetId part of your email only, without @ or a domain',
+      ),
+      findsOneWidget,
+    );
+  });
+
+  final invalidPasswords = <String, String>{
+    'too short': 'Abc1234',
+    'missing uppercase': 'abcdefgh1',
+    'missing lowercase': 'ABCDEFGH1',
+    'missing number': 'Abcdefgh',
+  };
+
+  for (final entry in invalidPasswords.entries) {
+    testWidgets('Registration rejects password: ${entry.key}', (tester) async {
+      app.main();
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Enter your first name'),
+        'Test',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Enter your UMNetID'),
+        'integrationtest',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Please enter a password'),
+        entry.value,
+      );
+
+      final createAccountButton = find.widgetWithText(
+        ElevatedButton,
+        'Create Account',
+      );
+
+      await tester.ensureVisible(createAccountButton);
+      await tester.pumpAndSettle();
+      await tester.tap(createAccountButton);
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(
+          'Your password must be at least 8 characters and include an uppercase letter, a lowercase letter and a number.',
+        ),
+        findsOneWidget,
+      );
+    });
+  }
 }
