@@ -10,7 +10,7 @@ class AuthResponseHandler {
       case 500:
         return 'It\'s not you, it\'s us. Please try again later.';
       default:
-        return 'An unexpected error occurred. Please try again.';
+        return 'An unexpected error occurred. Please try again later.';
     }
   }
 
@@ -25,7 +25,7 @@ class AuthResponseHandler {
       case 500:
         return 'It\'s not you, it\'s us. Please try again later.';
       default:
-        return 'Unable to register. Please try again.';
+        return 'Unable to register. Please try again later.';
     }
   }
 }
