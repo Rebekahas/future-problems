@@ -57,7 +57,9 @@ Hibernate uses `create-drop` to create tables when the application starts and dr
 ### Checks
 
 1. Build and test the backend with `bash ./mvnw --batch-mode verify`.
-2. Upload test reports from `backend/target/surefire-reports/`, even if tests fail.
+2. Collect coverage with JaCoCo and generate reports during the `verify` phase.
+3. Upload test reports from `backend/target/surefire-reports/`, even if tests fail.
+4. Upload coverage reports from `backend/target/site/jacoco/` after a successful build.
 
 ### Viewing results
 
@@ -67,4 +69,27 @@ Select the `backend-check` job to view the logs for each step.
 Download the `backend-test-reports` artifact and extract the ZIP file.
 Open the `.txt` report to see the test count, failures, errors, and skipped tests.
 
+For a successful run, download the `backend-coverage` artifact and extract the ZIP file. Open `index.html` in a browser to view the JaCoCo coverage report.
+
 If the build fails before reports are generated, check the workflow logs.
+
+
+## Flutter Integration Tests
+
+The workflow is defined in [flutter-integration.yml](../.github/workflows/flutter-integration.yml).
+
+It runs on every push and when a pull request is opened, reopened, or updated.
+
+### Environment
+
+The workflow runs on `ubuntu-latest` with Flutter `3.47.7`, Chrome, and a compatible ChromeDriver.
+
+Chrome runs in headless mode in CI.
+
+### Checks
+
+1. Start ChromeDriver on port `4444`.
+2. Run registration page and input validation tests.
+3. Run registration response tests with a local mock backend.
+
+The response tests use a mock backend and do not verify the real backend,database ,or email delivery.
