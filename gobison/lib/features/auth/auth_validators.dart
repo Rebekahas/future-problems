@@ -16,9 +16,9 @@ String? _validateEmail(String? value) {
     return 'Please enter your UMNetId';
   }
 
-  final UMNetId = value.trim();
+  final umNetId = value.trim();
 
-  if (UMNetId.contains('@')) {
+  if (umNetId.contains('@')) {
     return 'Enter the UMNetId part of your email only, without @ or a domain';
   }
 
@@ -30,8 +30,11 @@ String? _validatePassword(String? value) {
     return 'Please enter a password';
   }
 
-  if (value.length < 8) {
-    return 'Password must be at least 8 characters';
+  if (value.length < 8 ||
+      !RegExp(r'[A-Z]').hasMatch(value) ||
+      !RegExp(r'[a-z]').hasMatch(value) ||
+      !RegExp(r'[0-9]').hasMatch(value)) {
+    return 'Your password must be at least 8 characters and include an uppercase letter, a lowercase letter and a number.';
   }
 
   return null;

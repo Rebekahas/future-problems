@@ -25,8 +25,9 @@ class UserRepositoryImplTest {
 
     private User createTestUser(String firstName, String lastName, boolean verified) {
         String umNetId = "test_" + UUID.randomUUID().toString().replace("-", "");
-        testEmails.add(umNetId+"myUmanitoba.ca");
-        return new User(umNetId, "test-hash-not-a-real-password", firstName, lastName, verified);
+        String email = umNetId + "@myumanitoba.ca";
+        testEmails.add(umNetId+"@myumanitoba.ca");
+        return new User(email, "test-hash-not-a-real-password", firstName, lastName, verified);
     }
 
     @AfterEach

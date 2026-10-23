@@ -19,12 +19,11 @@ class GoBisonApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF654321)),
         useMaterial3: true,
       ),
-      initialRoute: '/register',
 
+      home: const RegisterPage(),
       routes: {
-        //'/': (context) => const HomePage(), TODO: Uncomment this line when the HomePage is implemented.
-        '/register': (context) => const RegisterPage(),
-        '/login': (context) => const LoginPage(),
+        '/register': (_) => const RegisterPage(),
+        '/login': (_) => const LoginPage(),
       },
     );
   }
