@@ -28,4 +28,20 @@ class AuthResponseHandler {
         return 'Unable to register. Please try again.';
     }
   }
+
+    static String handleVerificationError(int statusCode) {
+    switch (statusCode) {
+      case 400:
+        return 'Verification code is missing or malformed.';
+      case 401:
+        return 'User is not authenticated or the authentication token is invalid.';
+      case 409:
+        return 'The user\'s university email has already been verified.';
+      case 422:
+        return 'The verification code is incorrect.';
+      case 500:
+      default:
+        return 'Unexpected server failure.';
+    }
+  }
 }
