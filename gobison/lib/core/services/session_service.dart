@@ -71,6 +71,8 @@ class SessionService {
     }
   }
 
+  static String? get accessToken => _accessToken;
+
   static Future<void> saveSession({
     required String accessToken,
     required User user,
