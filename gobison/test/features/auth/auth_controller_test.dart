@@ -18,6 +18,7 @@ class FakeAuthService extends AuthService {
 
   Future<Map<String, dynamic>> Function()? onRegister;
   Future<Map<String, dynamic>> Function()? onLogin;
+  Future<Map<String, dynamic>> Function()? onVerifyEmail;
 
   @override
   Future<Map<String, dynamic>> register({
@@ -35,6 +36,14 @@ class FakeAuthService extends AuthService {
     required String password,
   }) {
     return onLogin!();
+  }
+
+  @override
+  Future<Map<String, dynamic>> verifyEmail({
+    required String token,
+    required String code,
+  }) {
+    return onVerifyEmail!();
   }
 }
 
@@ -152,6 +161,42 @@ void main() {
 
       expect(notificationCount, 2);
     });
+
+    test('verifyEmail displays an error when verification fails', () async {
+      authService.onVerifyEmail = () async {
+        throw Exception(
+          'Account verification failed (400): Invalid verification code',
+        );
+      };
+
+      await controller.emailVerification(
+        token: 'sample_token_123',
+        code: '000000',
+      );
+
+      expect(controller.errorMessage, isNotNull);
+      expect(controller.errorMessage, isNotEmpty);
+      expect(controller.isLoading, isFalse);
+    });
+
+    test('sets loading while email verification is in progress', () async {
+      final completer = Completer<Map<String, dynamic>>();
+
+      authService.onVerifyEmail = () => completer.future;
+
+      final future = controller.emailVerification(
+        token: 'sample_token_123',
+        code: '123456',
+      );
+
+      expect(controller.isLoading, isTrue);
+
+      completer.complete({'success': true, 'message': 'Verified'});
+
+      await future;
+
+      expect(controller.isLoading, isFalse);
+    });
   });
 
   group('extractErrorCode', () {
@@ -163,7 +208,7 @@ void main() {
     });
 
     test('returns -1 for an unsupported status code', () {
-      expect(extractErrorCode(Exception('Request failed (401)')), -1);
+      expect(extractErrorCode(Exception('Request failed (402)')), -1);
     });
   });
 }

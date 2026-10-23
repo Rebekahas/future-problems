@@ -3,12 +3,14 @@ class User {
   final String firstName;
   final String? lastName;
   final String email;
+  final bool verified;
 
   const User({
     required this.id,
     required this.firstName,
     this.lastName = '',
     required this.email,
+    this.verified = false,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {

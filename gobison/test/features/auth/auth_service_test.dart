@@ -166,5 +166,65 @@ void main() {
         );
       });
     });
+
+    group('AuthService.verifyEmail', () {
+      test('sends correct request with headers and body, returning decoded response on success', () async {
+        late http.Request capturedRequest;
+
+        final client = MockClient((request) async {
+          capturedRequest = request;
+
+          return http.Response(
+            '{"success": true, "message": "Email verified"}',
+            200,
+          );
+        });
+
+        final service = AuthService(client: client);
+
+        final result = await service.verifyEmail(
+          token: 'sample_token_abc',
+          code: '654321',
+        );
+
+        expect(capturedRequest.method, 'POST');
+        expect(
+          capturedRequest.url,
+          Uri.parse('${ApiConfig.baseUrl}/api/v1/auth/verify-email'),
+        );
+        expect(capturedRequest.headers['Content-Type'], 'application/json');
+        expect(capturedRequest.headers['Accept'], 'application/json');
+        expect(
+          capturedRequest.headers['Authorization'],
+          'Bearer sample_token_abc',
+        );
+
+        expect(jsonDecode(capturedRequest.body), {'code': '654321'});
+
+        expect(result['success'], true);
+        expect(result['message'], 'Email verified');
+      });
+
+      test('throws exception when verification fails with a non-200/201 status code', () async {
+        final client = MockClient((request) async {
+          return http.Response('Invalid verification code', 400);
+        });
+
+        final service = AuthService(client: client);
+
+        expect(
+          () => service.verifyEmail(token: 'sample_token_abc', code: '000000'),
+          throwsA(
+            isA<Exception>().having(
+              (e) => e.toString(),
+              'message',
+              contains(
+                'Account verification failed (400): Invalid verification code',
+              ),
+            ),
+          ),
+        );
+      });
+    });
   });
 }

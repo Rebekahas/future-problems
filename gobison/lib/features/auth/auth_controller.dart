@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:gobison/core/services/session_service.dart';
 
 import '../../core/models/user.dart';
 
@@ -35,6 +36,15 @@ class AuthController extends ChangeNotifier {
       );
 
       registeredUser = User.fromJson(data);
+      final user = User(
+        id: registeredUser!
+            .id, // Maps 'userId' from JSON to 'id' in your User model
+        firstName: registeredUser!.firstName,
+        lastName: registeredUser!.lastName,
+        email: registeredUser!.email,
+        verified: false,
+      );
+      await SessionService.saveUser(user: user);
     } catch (e) {
       errorMessage = AuthResponseHandler.handleRegistrationError(
         extractErrorCode(e),
@@ -51,9 +61,52 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _authService.login(email: email, password: password);
+      final responseData = await _authService.login(
+        email: email,
+        password: password,
+      );
+      final accessToken =
+          responseData['accessToken'] ?? false; // Extract the user map
+      final userMap = responseData['user'];
+      // Map the JSON keys explicitly to your User model fields
+      final user = User(
+        id: userMap['userId'], // Maps 'userId' from JSON to 'id' in your User model
+        firstName: userMap['firstName'],
+        lastName: userMap['lastName'],
+        email: userMap['email'],
+        verified: userMap['verified'] ?? false,
+      );
+      await SessionService.saveAccessToken(accessToken: accessToken);
+      await SessionService.saveUser(user: user);
+      await SessionService.setVerification(isVerified: user.verified);
     } catch (e) {
       errorMessage = AuthResponseHandler.handleLoginError(extractErrorCode(e));
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> emailVerification({
+    required String token,
+    required String code,
+    User? user,
+  }) async {
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
+
+    try {
+      final responseData = await _authService.verifyEmail(
+        token: token,
+        code: code,
+      );
+      final isVerified = responseData['universityVerified'];
+      await SessionService.setVerification(isVerified: isVerified);
+    } catch (e) {
+      errorMessage = AuthResponseHandler.handleVerificationError(
+        extractErrorCode(e),
+      );
     } finally {
       isLoading = false;
       notifyListeners();
@@ -66,8 +119,14 @@ int extractErrorCode(Object e) {
   if (message.contains('400')) {
     return 400;
   }
+  if (message.contains('401')) {
+    return 401;
+  }
   if (message.contains('409')) {
     return 409;
+  }
+  if (message.contains('422')) {
+    return 422;
   }
   if (message.contains('429')) {
     return 429;

@@ -50,21 +50,18 @@ class _RegisterPageState extends State<RegisterPage> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-
     await _authController.register(
       firstName: _firstNameController.text.trim(),
       lastName: _lastNameController.text.trim(),
       email: '${_emailController.text.trim()}@myumanitoba.ca',
       password: _passwordController.text,
     );
-
     if (!mounted) return;
-
     if (_authController.registeredUser != null) {
       Navigator.of(
         context,
       ).pushReplacement(MaterialPageRoute(builder: (_) => const SessionGate()));
-    }
+    } else {}
   }
 
   Widget _buildTextField({
