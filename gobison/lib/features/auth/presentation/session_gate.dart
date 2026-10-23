@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gobison/features/auth/presentation/verification_page.dart';
 
 import 'login_page.dart';
 import '../../home/presentation/home_page.dart';
@@ -60,6 +61,15 @@ class _SessionGateState extends State<SessionGate> {
 
         if (session == null) {
           return const LoginPage();
+        }
+
+        if (session.user.verified == false) {
+          return VerificationPage(
+            email: session.user.email,
+            user: session.user,
+            authToken: session.accessToken!,
+            userProfile: session.profile,
+          );
         }
 
         return HomePage(

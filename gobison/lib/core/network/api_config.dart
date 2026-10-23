@@ -6,10 +6,10 @@ class ApiConfig {
       final host = Uri.base.host;
 
       if (host == 'localhost' || host == '127.0.0.1') {
-        return 'http://localhost:3000';
+        return 'http://localhost:8080';
       }
     }
 
-    return 'https://production-server.com'; //TODO: Replace with actual API url
+    return 'http://localhost:8080'; //TODO: Replace with actual API url
   }
 }

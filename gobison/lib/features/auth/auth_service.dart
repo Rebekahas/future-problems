@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+//import 'package:gobison/features/auth/api_service_mock.dart';
+
 import 'package:http/http.dart' as http;
 
 import '../../../core/network/api_config.dart';
@@ -16,7 +18,6 @@ class AuthService {
     required String password,
   }) async {
     final uri = Uri.parse('${ApiConfig.baseUrl}/api/v1/auth/register');
-
     final response = await _client.post(
       uri,
       headers: {
@@ -62,6 +63,32 @@ class AuthService {
 
     throw Exception(
       'Login failed (${response.statusCode}): '
+      '${response.body}',
+    );
+  }
+
+  Future<Map<String, dynamic>> verifyEmail({
+    required String token,
+    required String code,
+  }) async {
+    final uri = Uri.parse('${ApiConfig.baseUrl}/api/v1/auth/verify-email');
+
+    final response = await _client.post(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({'code': code}),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return jsonDecode(response.body);
+    }
+
+    throw Exception(
+      'Account verification failed (${response.statusCode}): '
       '${response.body}',
     );
   }
