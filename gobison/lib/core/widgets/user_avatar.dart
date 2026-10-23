@@ -6,25 +6,25 @@ class UserAvatar extends StatelessWidget {
   const UserAvatar({
     super.key,
     required this.firstName,
-    required this.lastName,
+    this.lastName,
     this.imageUrl,
     this.radius = 24,
     this.onTap,
   });
 
   final String firstName;
-  final String lastName;
+  final String? lastName;
   final String? imageUrl;
   final double radius;
   final VoidCallback? onTap;
 
   String get _initials {
     final first = firstName.trim();
-    final last = lastName.trim();
+    final last = lastName != null ? lastName?.trim() : '';
 
     return [
       if (first.isNotEmpty) first[0],
-      if (last.isNotEmpty) last[0],
+      if (last!.isNotEmpty) last[0],
     ].join().toUpperCase();
   }
 
@@ -34,7 +34,7 @@ class UserAvatar extends StatelessWidget {
 
     return Semantics(
       button: onTap != null,
-      label: '${lastName.isNotEmpty ? lastName : firstName} profile',
+      label: '${lastName!.isNotEmpty ? lastName : firstName} profile',
       child: InkWell(
         onTap: onTap,
         customBorder: const CircleBorder(),

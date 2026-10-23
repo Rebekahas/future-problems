@@ -38,7 +38,6 @@ public class RegisterAccountService {
     public RegisteredAccount registerAccount(String firstName, String lastName, String email, String password,
                                              HttpServletRequest request, HttpServletResponse response) {
         if (firstName == null || firstName.isBlank()
-                || lastName == null || lastName.isBlank()
                 || password == null ) {
             throw new RegisterAccountException(INVALID_REQUEST);
         }

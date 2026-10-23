@@ -70,8 +70,6 @@ class RegisterAccountServiceTest {
     void rejectsNullOrBlankNamesAndNullPasswordBeforeDoingWork() {
         assertInvalidRequest(null, "Lovelace", "ada@example.com", "password");
         assertInvalidRequest("  ", "Lovelace", "ada@example.com", "password");
-        assertInvalidRequest("Ada", null, "ada@example.com", "password");
-        assertInvalidRequest("Ada", " \t", "ada@example.com", "password");
         assertInvalidRequest("Ada", "Lovelace", "ada@example.com", null);
 
         verifyNoInteractions(userRepository, passwordEncoder, sessionAuthenticationService);
